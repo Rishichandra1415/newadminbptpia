@@ -286,7 +286,7 @@ export function NewsEventsTable({
                                     name="title" required type="text" placeholder="e.g. Tech Seminar 2026" 
                                     className="w-full p-2.5 rounded-lg text-sm text-slate-700 outline-none transition-all border border-slate-200 bg-white focus:border-[#00b4d8]" 
                                     value={formData.title} 
-                                    onChange={(e) => setFormData({...formData, title: e.target.value.replace(/\b\w/g, c => c.toUpperCase())})} 
+                                    onChange={(e) => setFormData({...formData, title: capitalizeWords(e.target.value)})} 
                                 />
                             </div>
 

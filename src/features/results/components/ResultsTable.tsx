@@ -303,7 +303,7 @@ export function ResultsTable({
                                     name="examName" required type="text" placeholder="e.g. Polytechnic 2nd Sem Result 2026" 
                                     className="w-full p-2.5 rounded-lg text-sm text-slate-700 outline-none transition-all border border-slate-200 bg-white focus:border-[#00b4d8]" 
                                     value={formData.examName} 
-                                    onChange={(e) => setFormData({...formData, examName: e.target.value})} 
+                                    onChange={(e) => setFormData({...formData, examName: capitalizeWords(e.target.value)})} 
                                 />
                             </div>
 

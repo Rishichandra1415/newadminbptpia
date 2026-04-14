@@ -721,8 +721,7 @@ export function GovLettersTable({
                                 <input 
                                     name="title" required type="text" placeholder="e.g. Scholarship Notification 2026" 
                                     className="w-full p-2.5 rounded-lg text-sm text-slate-700 outline-none transition-all border border-slate-200 bg-white focus:border-[#00b4d8]" 
-                                    value={formData.title} 
-                                    onChange={(e) => setFormData({...formData, title: e.target.value.replace(/\b\w/g, c => c.toUpperCase())})} 
+                                    onChange={(e) => setFormData({...formData, title: capitalizeWords(e.target.value)})} 
                                 />
                             </div>
 
@@ -752,8 +751,7 @@ export function GovLettersTable({
                                 <input 
                                     name="subject" required type="text" placeholder="Brief subject of the letter" 
                                     className="w-full p-2.5 rounded-lg text-sm text-slate-700 outline-none transition-all border border-slate-200 bg-white focus:border-[#00b4d8]" 
-                                    value={formData.subject} 
-                                    onChange={(e) => setFormData({...formData, subject: e.target.value.replace(/\b\w/g, c => c.toUpperCase())})} 
+                                    onChange={(e) => setFormData({...formData, subject: capitalizeWords(e.target.value)})} 
                                 />
                             </div>
                         </div>
@@ -783,8 +781,7 @@ export function GovLettersTable({
                                 <textarea 
                                     name="description" required rows={3} placeholder="Provide detailed description..." 
                                     className="w-full p-2.5 rounded-lg text-sm text-slate-700 outline-none transition-all border border-slate-200 bg-white focus:border-[#00b4d8] resize-none" 
-                                    value={formData.description} 
-                                    onChange={(e) => setFormData({...formData, description: e.target.value.replace(/\b\w/g, c => c.toUpperCase())})} 
+                                    onChange={(e) => setFormData({...formData, description: capitalizeWords(e.target.value)})} 
                                 />
                             </div>
 

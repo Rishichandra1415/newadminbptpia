@@ -295,8 +295,8 @@ export function EnquiriesTable({
                                 <input 
                                     required type="text" placeholder="John Doe" 
                                     className="w-full p-2.5 rounded-lg text-sm border border-slate-200 focus:border-[#00b4d8] outline-none transition-all" 
-                                    value={formData.name} 
-                                    onChange={(e) => setFormData({...formData, name: e.target.value})} 
+                                    value={formData.name || ""} 
+                                    onChange={(e) => setFormData({...formData, name: capitalizeWords(e.target.value)})} 
                                 />
                             </div>
 
@@ -326,8 +326,8 @@ export function EnquiriesTable({
                                 <input 
                                     required type="text" placeholder="Polytechnic Computer Science" 
                                     className="w-full p-2.5 rounded-lg text-sm border border-slate-200 focus:border-[#00b4d8] outline-none" 
-                                    value={formData.programme} 
-                                    onChange={(e) => setFormData({...formData, programme: e.target.value})} 
+                                    value={formData.programme || ""} 
+                                    onChange={(e) => setFormData({...formData, programme: capitalizeWords(e.target.value)})} 
                                 />
                             </div>
                         </div>

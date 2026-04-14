@@ -27,8 +27,12 @@ export const navItems: NavItem[] = [
   },
   { 
     title: "List of Colleges", 
-    href: "/admin/colleges",
-    iconPath: "M12 3L1 9l11 6 9-4.91V17h2V9L12 3zM3.88 9L12 4.58 20.12 9 12 13.42 3.88 9zM12 15.5c-3.11 0-5.85-1.59-7.43-4L3 13c1.91 2.96 5.22 5 9 5s7.09-2.04 9-5l-1.57-1.5c-1.58 2.41-4.32 4-7.43 4z"
+    href: "/admin/colleges/engineering",
+    iconPath: "M12 3L1 9l11 6 9-4.91V17h2V9L12 3zM3.88 9L12 4.58 20.12 9 12 13.42 3.88 9zM12 15.5c-3.11 0-5.85-1.59-7.43-4L3 13c1.91 2.96 5.22 5 9 5s7.09-2.04 9-5l-1.57-1.5c-1.58 2.41-4.32 4-7.43 4z",
+    items: [
+      { title: "Engineering College", href: "/admin/colleges/engineering" },
+      { title: "Polytechnic College", href: "/admin/colleges/polytechnic" }
+    ]
   },
   { 
     title: "Media Gallery", 

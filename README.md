@@ -16,6 +16,25 @@ Built with the latest cutting-edge technologies for speed and scalability:
 
 ---
 
+## 🎨 Typography & Design
+
+We use a premium, modern typography system to ensure maximum readability and a sleek aesthetic.
+
+- **Primary Font**: **[Geist Sans](https://vercel.com/font/sans)** (Main body and UI elements)
+- **Monospace Font**: **[Geist Mono](https://vercel.com/font/mono)** (Codes, IDs, and numeric data)
+
+### Default Tag Styling:
+| Tag | Usage | styling details |
+| :--- | :--- | :--- |
+| **`h1`** | Page Titles | `3xl`, Light weight, Cyan-Blue, Wide tracking |
+| **`h2`** | Modal Headers | `20px`, Semi-bold, Slate-800 |
+| **`h3`** | Section Headers | `13px`, Bold, Uppercase, Primary Blue/Green |
+| **`p`** | Body Text | `sm` (14px), Slate-600, Regular weight |
+| **`label`** | Form Labels | `11px`, Bold, Uppercase, Muted Slate |
+| **`span`** | Metadata/Chips | `10px`, Bold, Tracking-widest |
+
+---
+
 ## 📂 Project Structure
 
 We follow a **Feature-Based Architecture**, which makes the code easy to maintain and scale.

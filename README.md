@@ -1,36 +1,81 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# BPTPIA Admin Dashboard
 
-## Getting Started
+A professional, high-performance administrative panel for the **Bihar Private Technical & Professional Institutions Association (BPTPIA)**. Built with **Next.js 16**, **React 19**, and **Tailwind CSS 4**.
 
-First, run the development server:
+---
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+## 🏗️ Clean Modular Architecture
+
+This project follows a **Feature-Based Architecture** to ensure maximum scalability, logic isolation, and maintainability.
+
+### 📁 Project Structure
+
+```text
+src/
+├── app/                  # Next.js App Router (Routing & Group Layouts)
+│   └── (dashboard)/      # Protected dashboard route group
+├── features/             # Business Features (Modular & Isolated)
+│   └── [feature-name]/   # Contains its own:
+│       ├── components/   # Feature-specific UI
+│       ├── hooks/        # State & data management
+│       ├── services/     # API interaction logic
+│       └── types.ts      # TypeScript definitions
+├── shared/               # Global cross-cutting concerns
+│   ├── api/              # Centralized API Client & Endpoints
+│   ├── components/       # Reusable layout & UI Boilerplate
+│   └── utils/            # Shared helper functions
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+---
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## 💎 Premium UI & UX Standards
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+The dashboard is designed to provide a "Desktop App" experience with high-end aesthetic standards:
 
-## Learn More
+- **Architecture**: **Non-paginated Scrolling**. All data tables use high-performance internal scrolling to show full lists without page reloads.
+- **Formatting**: **Auto-Title Case**. All name fields in the Master module automatically format input (e.g., "patna" → "Patna") in real-time.
+- **Aesthetics**: 
+    - **Unified Scrollbars**: Sleek, custom-themed scrollbars are applied globally via `globals.css`.
+    - **Action Feedback**: Optimized color-coding (**Red for Delete**, **Blue for Edit**) for intuitive interactions.
+    - **Glassmorphism**: Subtle backdrop-blurs and gradients used in modals and headers.
 
-To learn more about Next.js, take a look at the following resources:
+---
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## 🚀 Data & Service Layer
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+We use a robust, type-safe communication strategy:
 
-## Deploy on Vercel
+### 1. Centralized API Client (`src/shared/api`)
+Handles base URL prefixing, JSON headers, and global error logging automatically.
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+### 2. Feature Services
+Each module (News, Gov-Letters, Master) has its own service layer, abstracting API complexity away from the UI.
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+```typescript
+// Example: Master Module Service
+const states = await masterService.getStates();
+```
+
+---
+
+## 🛠️ Getting Started
+
+### 1. Environment Configuration
+Create a `.env.local` file in the root directory:
+
+```bash
+NEXT_PUBLIC_API_URL=http://localhost:5000/api
+```
+
+### 2. Installation & Development
+```bash
+npm install
+npm run dev
+```
+
+---
+
+## 📝 Coding Standards
+- **Feature Isolation**: Never put feature-specific logic in the `shared` folder.
+- **Strict Typing**: No `any` types; always define interfaces in the feature's `types.ts`.
+- **Naming**: `PascalCase` for Components, `camelCase` for hooks and services.

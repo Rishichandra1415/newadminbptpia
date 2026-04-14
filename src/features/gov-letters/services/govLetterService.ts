@@ -19,7 +19,7 @@ export const govLetterService = {
     return apiClient<{ success: boolean; data: GovernmentLetter }>(API_ENDPOINTS.GOV_LETTER, {
       method: "POST",
       body: formData,
-      headers: {}, 
+      headers: {}, // Let browser set Content-Type with boundary for multipart/form-data
     });
   },
 

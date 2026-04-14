@@ -1,81 +1,109 @@
-# BPTPIA Admin Dashboard
+# 🚀 BPTPIA Admin Dashboard
 
-A professional, high-performance administrative panel for the **Bihar Private Technical & Professional Institutions Association (BPTPIA)**. Built with **Next.js 16**, **React 19**, and **Tailwind CSS 4**.
+Welcome to the **Bihar Private Technical & Professional Institutions Association (BPTPIA)** Admin Panel. This is a high-performance, professional-grade dashboard designed for managing institutional data, leads, news, and official correspondence.
 
 ---
 
-## 🏗️ Clean Modular Architecture
+## 🛠️ Tech Stack
 
-This project follows a **Feature-Based Architecture** to ensure maximum scalability, logic isolation, and maintainability.
+Built with the latest cutting-edge technologies for speed and scalability:
 
-### 📁 Project Structure
+- **Framework**: [Next.js 16 (App Router)](https://nextjs.org/)
+- **UI Library**: [React 19](https://react.dev/)
+- **Styling**: [Tailwind CSS 4](https://tailwindcss.com/)
+- **Icons**: [Lucide React](https://lucide.dev/)
+- **Language**: [TypeScript](https://www.typescriptlang.org/)
+
+---
+
+## 📂 Project Structure
+
+We follow a **Feature-Based Architecture**, which makes the code easy to maintain and scale.
 
 ```text
-src/
-├── app/                  # Next.js App Router (Routing & Group Layouts)
-│   └── (dashboard)/      # Protected dashboard route group
-├── features/             # Business Features (Modular & Isolated)
-│   └── [feature-name]/   # Contains its own:
-│       ├── components/   # Feature-specific UI
-│       ├── hooks/        # State & data management
-│       ├── services/     # API interaction logic
-│       └── types.ts      # TypeScript definitions
-├── shared/               # Global cross-cutting concerns
-│   ├── api/              # Centralized API Client & Endpoints
-│   ├── components/       # Reusable layout & UI Boilerplate
-│   └── utils/            # Shared helper functions
+root/
+├── public/                 # Static assets (images, icons, etc.)
+├── src/
+│   ├── app/                # 🌐 Routing & Layouts (Next.js App Router)
+│   │   ├── (dashboard)/    # Protected dashboard routes
+│   │   ├── globals.css     # Global styles & Tailwind imports
+│   │   └── layout.tsx      # Root layout
+│   │
+│   ├── features/           # 📦 Business Modules (Feature-specific logic)
+│   │   ├── gov-letters/    # Official government letters management
+│   │   ├── leads/          # Student leads & inquiries
+│   │   ├── master/         # Master data (States, Cities, Institutions)
+│   │   ├── media-gallery/  # Image and video gallery management
+│   │   └── news/           # News and announcements
+│   │       │
+│   │       ├── components/ # UI components specific to this feature
+│   │       ├── hooks/      # Custom React hooks for logic
+│   │       ├── services/   # API calls specific to this feature
+│   │       └── types.ts    # TypeScript definitions
+│   │
+│   └── shared/             # ♻️ Reusable Global Code
+│       ├── api/            # Centralized API client (Axios/Fetch setup)
+│       ├── components/     # UI Boilerplate (Buttons, Modals, Cards)
+│       └── utils/          # Helper functions (Formatting, Validation)
+│
+├── .env.local              # Local environment variables (API URLs)
+├── next.config.ts          # Next.js configuration
+├── package.json            # Project dependencies and scripts
+└── tsconfig.json           # TypeScript configuration
 ```
 
 ---
 
-## 💎 Premium UI & UX Standards
+## 📖 Key Folder Explanations
 
-The dashboard is designed to provide a "Desktop App" experience with high-end aesthetic standards:
+### 1. `src/app`
+Think of this as the **Map** of your website. Each folder inside `app` represents a URL path.
+- **`(dashboard)`**: A "Route Group" used to organize all protected admin pages together without adding `/dashboard` to the URL.
 
-- **Architecture**: **Non-paginated Scrolling**. All data tables use high-performance internal scrolling to show full lists without page reloads.
-- **Formatting**: **Auto-Title Case**. All name fields in the Master module automatically format input (e.g., "patna" → "Patna") in real-time.
-- **Aesthetics**: 
-    - **Unified Scrollbars**: Sleek, custom-themed scrollbars are applied globally via `globals.css`.
-    - **Action Feedback**: Optimized color-coding (**Red for Delete**, **Blue for Edit**) for intuitive interactions.
-    - **Glassmorphism**: Subtle backdrop-blurs and gradients used in modals and headers.
+### 2. `src/features`
+This is the **Heart** of the application. Instead of putting all components in one big folder, we group them by what they *do*.
+- **`services/`**: Files that talk to the backend server.
+- **`hooks/`**: Special React functions that handle "state" or logic.
+- **`types.ts`**: Tells TypeScript exactly what your data looks like (e.g., what fields a "Lead" has).
 
----
-
-## 🚀 Data & Service Layer
-
-We use a robust, type-safe communication strategy:
-
-### 1. Centralized API Client (`src/shared/api`)
-Handles base URL prefixing, JSON headers, and global error logging automatically.
-
-### 2. Feature Services
-Each module (News, Gov-Letters, Master) has its own service layer, abstracting API complexity away from the UI.
-
-```typescript
-// Example: Master Module Service
-const states = await masterService.getStates();
-```
+### 3. `src/shared`
+This is the **Toolbox**. If you have a button or a date formatter that is used in *multiple* features, it belongs here.
 
 ---
 
-## 🛠️ Getting Started
+## 💎 Features & Standards
 
-### 1. Environment Configuration
-Create a `.env.local` file in the root directory:
+- **Clean UI**: Dark/Light mode support with a premium, sleek aesthetic.
+- **Real-time Formatting**: Names are automatically converted to Title Case (e.g., "patna" → "Patna").
+- **Fast Performance**: Uses Next.js optimized rendering and zero-pagination scrolling for a smooth "Desktop App" feel.
+- **Type Safety**: Fully typed with TypeScript to catch bugs before they happen.
 
+---
+
+## 🚀 Getting Started
+
+### 1. Setup Environment
+Create a `.env.local` file in the root and add your backend API URL:
 ```bash
-NEXT_PUBLIC_API_URL=http://localhost:5000/api
+NEXT_PUBLIC_API_URL=https://your-api-link.com/api
 ```
 
-### 2. Installation & Development
+### 2. Install & Run
 ```bash
+# Install dependencies
 npm install
+
+# Start development server
 npm run dev
 ```
+Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
 
 ---
 
-## 📝 Coding Standards
-- **Feature Isolation**: Never put feature-specific logic in the `shared` folder.
-- **Strict Typing**: No `any` types; always define interfaces in the feature's `types.ts`.
-- **Naming**: `PascalCase` for Components, `camelCase` for hooks and services.
+## 📏 Coding Guidelines
+
+- **Keep it Modular**: If you are working on "News", all news-related logic should stay inside `features/news`.
+- **No 'any'**: Always define types in `types.ts` to keep the code reliable.
+- **Naming**: 
+  - Components: `PascalCase.tsx`
+  - Everything else: `camelCase.ts`

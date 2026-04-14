@@ -11,7 +11,9 @@ export const API_ENDPOINTS = {
   GALLERY: "/gallery",
   CONTACT: "/contact",
   NEWS: "/news",
-  GOV_LETTER: "/letters",
+  GOV_LETTER: "/government-letters",
+  RESULTS: "/results",
+  ENQUIRIES: "/enquiries",
   PHOTOS: "/photos",
   VIDEOS: "/videos",
 } as const;

@@ -16,4 +16,5 @@ export const API_ENDPOINTS = {
   ENQUIRIES: "/enquiries",
   PHOTOS: "/photos",
   VIDEOS: "/videos",
+  DOWNLOADS: "/downloads",
 } as const;

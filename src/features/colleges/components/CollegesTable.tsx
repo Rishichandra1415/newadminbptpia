@@ -7,7 +7,8 @@ import {
     Plus, School, 
     MapPin, Phone, 
     Mail, ExternalLink,
-    ShieldCheck, EyeOff
+    ShieldCheck, EyeOff,
+    ChevronLeft, ChevronRight
 } from 'lucide-react';
 import { CollegesTableProps, College } from "../types";
 import { CourseToggleGroup } from "./CourseToggleGroup";
@@ -23,11 +24,25 @@ export function CollegesTable({
   onRefresh
 }: CollegesTableProps) {
   const [searchTerm, setSearchTerm] = useState("");
+  const [currentPage, setCurrentPage] = useState(1);
+  const pageSize = 7;
 
   const filteredData = data.filter(item => 
     item.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
     item.code.toLowerCase().includes(searchTerm.toLowerCase())
   );
+
+  // Pagination Logic
+  const totalItems = filteredData.length;
+  const totalPages = Math.ceil(totalItems / pageSize);
+  const startIndex = (currentPage - 1) * pageSize;
+  const paginatedData = filteredData.slice(startIndex, startIndex + pageSize);
+
+  const handlePageChange = (newPage: number) => {
+    if (newPage >= 1 && newPage <= totalPages) {
+      setCurrentPage(newPage);
+    }
+  };
 
   return (
     <div className="h-full flex flex-col gap-4 md:gap-6 w-full font-sans max-w-full">
@@ -54,7 +69,10 @@ export function CollegesTable({
             <input 
               type="text" 
               placeholder="Search by name or code..." 
-              onChange={(e) => setSearchTerm(e.target.value)}
+              onChange={(e) => {
+                setSearchTerm(e.target.value);
+                setCurrentPage(1);
+              }}
               className="bg-transparent border-none outline-none text-[13px] md:text-sm w-full text-slate-600 placeholder:text-slate-400"
             />
           </div>
@@ -78,7 +96,7 @@ export function CollegesTable({
       </div>
 
       {/* DATA TABLE SECTION */}
-      <div className="flex-1 bg-white rounded-md border border-slate-200 shadow-sm overflow-hidden flex flex-col min-h-0">
+      <div className="flex-1 bg-white rounded-md border border-slate-200 shadow-sm overflow-hidden flex flex-col min-h-0 max-h-[calc(100vh-220px)]">
         <div className="flex-1 overflow-auto custom-scrollbar text-left">
           <table className="w-full text-left border-collapse whitespace-nowrap lg:whitespace-normal min-w-[1200px]">
             <thead className="sticky top-0 z-10 bg-slate-50">
@@ -92,7 +110,7 @@ export function CollegesTable({
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-50">
-              {filteredData.map((college, idx) => (
+              {paginatedData.map((college, idx) => (
                 <tr key={college.id} className="hover:bg-slate-50/50 transition-colors group">
                   <td className="p-3 md:p-4 text-center text-slate-400 text-xs font-medium italic">
                     {college.code}
@@ -187,6 +205,51 @@ export function CollegesTable({
           </table>
         </div>
       </div>
+
+      {/* 🧭 PROFESSIONAL PAGINATION BAR */}
+      {totalItems > 0 && (
+        <div className="flex flex-col sm:flex-row justify-between items-center gap-4 bg-slate-50/50 p-4 rounded-xl border border-slate-100 mt-2">
+            <div className="text-[12px] text-slate-500 font-medium order-2 sm:order-1">
+                Showing <span className="text-slate-900 font-bold">{startIndex + 1}</span> to <span className="text-slate-900 font-bold">{Math.min(startIndex + pageSize, totalItems)}</span> of <span className="text-slate-900 font-bold">{totalItems}</span> records
+            </div>
+            
+            <div className="flex items-center gap-1 order-1 sm:order-2">
+                <button 
+                    onClick={() => handlePageChange(currentPage - 1)}
+                    disabled={currentPage === 1}
+                    className="flex items-center gap-1 px-3 py-1.5 rounded-lg text-[12px] font-bold text-slate-500 hover:bg-white hover:text-[#00b4d8] disabled:opacity-30 disabled:hover:bg-transparent disabled:hover:text-slate-500 transition-all mr-2"
+                >
+                    <ChevronLeft size={16} />
+                    Prev
+                </button>
+                
+                <div className="flex items-center gap-1">
+                    {[...Array(totalPages)].map((_, i) => (
+                        <button
+                            key={i}
+                            onClick={() => handlePageChange(i + 1)}
+                            className={`w-8 h-8 rounded-lg text-[12px] font-black transition-all ${
+                                currentPage === i + 1 
+                                ? 'bg-white text-[#00b4d8] shadow-sm border border-slate-200 ring-2 ring-blue-50' 
+                                : 'text-slate-400 hover:bg-white hover:text-slate-600'
+                            }`}
+                        >
+                            {i + 1}
+                        </button>
+                    ))}
+                </div>
+
+                <button 
+                    onClick={() => handlePageChange(currentPage + 1)}
+                    disabled={currentPage === totalPages}
+                    className="flex items-center gap-1 px-3 py-1.5 rounded-lg text-[12px] font-bold text-slate-500 hover:bg-white hover:text-[#00b4d8] disabled:opacity-30 disabled:hover:bg-transparent disabled:hover:text-slate-500 transition-all ml-2"
+                >
+                    Next
+                    <ChevronRight size={16} />
+                </button>
+            </div>
+        </div>
+      )}
     </div>
   );
 }

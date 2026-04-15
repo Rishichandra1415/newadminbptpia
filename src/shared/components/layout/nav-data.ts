@@ -68,25 +68,25 @@ export const navItems: NavItem[] = [
     href: "/admin/enquiry",
     iconPath: "M20 2H4c-1.1 0-1.99.9-1.99 2L2 22l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm-2 12H6v-2h12v2zm0-3H6V9h12v2zm0-3H6V6h12v2z"
   },
+  // { 
+  //   title: "Slider Images", 
+  //   href: "/admin/sliders",
+  //   iconPath: "M21 19V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2zM8.5 13.5l2.5 3.01L14.5 12l4.5 6H5l3.5-4.5z"
+  // },
   { 
-    title: "Slider Images", 
-    href: "/admin/sliders",
-    iconPath: "M21 19V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2zM8.5 13.5l2.5 3.01L14.5 12l4.5 6H5l3.5-4.5z"
-  },
-  { 
-    title: "Student Download", 
-    href: "/admin/student-download",
+    title: "Downloads", 
+    href: "/admin/downloads",
     iconPath: "M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"
   },
-  { 
-    title: "Support Section", 
-    href: "/admin/support",
-    iconPath: "M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 17h-2v-2h2v2zm2.07-7.75l-.9.92C13.45 12.9 13 13.5 13 15h-2v-.5c0-1.1.45-2.1 1.17-2.83l1.24-1.26c.37-.36.59-.86.59-1.41 0-1.1-.9-2-2-2s-2 .9-2 2H8c0-2.21 1.79-4 4-4s4 1.79 4 4c0 .88-.36 1.68-.93 2.25z"
-  },
-  { 
-    title: "Official Download", 
-    href: "/admin/official-download",
-    iconPath: "M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4zM12 12h7c-.53 4.12-3.28 7.79-7 8.94V12H5V6.3l7-3.11V12z"
-  },
+  // { 
+  //   title: "Support Section", 
+  //   href: "/admin/support",
+  //   iconPath: "M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 17h-2v-2h2v2zm2.07-7.75l-.9.92C13.45 12.9 13 13.5 13 15h-2v-.5c0-1.1.45-2.1 1.17-2.83l1.24-1.26c.37-.36.59-.86.59-1.41 0-1.1-.9-2-2-2s-2 .9-2 2H8c0-2.21 1.79-4 4-4s4 1.79 4 4c0 .88-.36 1.68-.93 2.25z"
+  // },
+  // { 
+  //   title: "Official Download", 
+  //   href: "/admin/official-download",
+  //   iconPath: "M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4zM12 12h7c-.53 4.12-3.28 7.79-7 8.94V12H5V6.3l7-3.11V12z"
+  //},
 
 ];

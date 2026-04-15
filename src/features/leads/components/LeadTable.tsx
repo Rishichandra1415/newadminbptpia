@@ -4,15 +4,13 @@ import React, { useState } from "react";
 import { 
     Download, Search, RotateCw, 
     Trash2, Mail, Phone, ChevronDown, 
-    Check, Clock, Archive, Send
+    Check, Clock, Archive, Send,
+    ChevronLeft, ChevronRight
 } from 'lucide-react';
 import { LeadTableProps, Lead } from "../types";
 
 export function LeadTable({
   data,
-  totalItems,
-  itemsPerPage,
-  currentPage,
   baseUrl,
   onDelete,
   onRefresh,
@@ -21,6 +19,25 @@ export function LeadTable({
   onStatusUpdate
 }: LeadTableProps) {
   const [openDropdownId, setOpenDropdownId] = useState<number | null>(null);
+  const [currentPage, setCurrentPage] = useState(1);
+  const pageSize = 7;
+
+  // Reset to page 1 when data changes (e.g. on search)
+  React.useEffect(() => {
+    setCurrentPage(1);
+  }, [data]);
+
+  // Pagination Logic
+  const totalItemsCount = data.length;
+  const totalPages = Math.ceil(totalItemsCount / pageSize);
+  const startIndex = (currentPage - 1) * pageSize;
+  const paginatedData = data.slice(startIndex, startIndex + pageSize);
+
+  const handlePageChange = (newPage: number) => {
+    if (newPage >= 1 && newPage <= totalPages) {
+      setCurrentPage(newPage);
+    }
+  };
 
   const statusOptions: { label: Lead['status']; icon: any; color: string; bgColor: string }[] = [
     { label: 'NEW', icon: Clock, color: 'text-blue-600', bgColor: 'bg-blue-50' },
@@ -76,9 +93,9 @@ export function LeadTable({
         </div>
       </div>
 
-      {/* 📊 DATA TABLE SECTION - Reduced min-width and fixed clipping */}
-      <div className="w-full bg-white rounded-xl border border-slate-100 shadow-sm flex flex-col min-h-[500px]">
-        <div className="overflow-x-auto custom-scrollbar">
+      {/* 📊 DATA TABLE SECTION - Standardized Height */}
+      <div className="w-full bg-white rounded-xl border border-slate-100 shadow-sm flex flex-col min-h-0 max-h-[calc(100vh-220px)] overflow-hidden">
+        <div className="flex-1 overflow-auto custom-scrollbar">
           <table className="w-full text-left border-collapse min-w-[800px]">
             <thead>
               <tr className="border-b border-slate-50 text-[13px] text-[#00b4d8] tracking-wide font-medium bg-white">
@@ -93,10 +110,10 @@ export function LeadTable({
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-50">
-              {data.map((lead) => (
+              {paginatedData.map((lead, idx) => (
                 <tr key={lead.id} className="hover:bg-slate-50/30 transition-colors group relative">
                   <td className="p-4 text-center">
-                    <input type="checkbox" className="w-4 h-4 rounded border-slate-300 text-[#00b4d8] cursor-pointer accent-[#00b4d8]" />
+                    <span className="text-xs text-slate-400 font-medium">{startIndex + idx + 1}</span>
                   </td>
                   
                   {/* Lead Details */}
@@ -200,6 +217,50 @@ export function LeadTable({
         </div>
       </div>
 
+      {/* 🧭 PROFESSIONAL PAGINATION BAR */}
+      {totalItemsCount > 0 && (
+        <div className="flex flex-col sm:flex-row justify-between items-center gap-4 bg-slate-50/50 p-4 rounded-xl border border-slate-100 mt-2">
+            <div className="text-[12px] text-slate-500 font-medium order-2 sm:order-1">
+                Showing <span className="text-slate-900 font-bold">{startIndex + 1}</span> to <span className="text-slate-900 font-bold">{Math.min(startIndex + pageSize, totalItemsCount)}</span> of <span className="text-slate-900 font-bold">{totalItemsCount}</span> records
+            </div>
+            
+            <div className="flex items-center gap-1 order-1 sm:order-2">
+                <button 
+                    onClick={() => handlePageChange(currentPage - 1)}
+                    disabled={currentPage === 1}
+                    className="flex items-center gap-1 px-3 py-1.5 rounded-lg text-[12px] font-bold text-slate-500 hover:bg-white hover:text-[#00b4d8] disabled:opacity-30 disabled:hover:bg-transparent disabled:hover:text-slate-500 transition-all mr-2"
+                >
+                    <ChevronLeft size={16} />
+                    Prev
+                </button>
+                
+                <div className="flex items-center gap-1">
+                    {[...Array(totalPages)].map((_, i) => (
+                        <button
+                            key={i}
+                            onClick={() => handlePageChange(i + 1)}
+                            className={`w-8 h-8 rounded-lg text-[12px] font-black transition-all ${
+                                currentPage === i + 1 
+                                ? 'bg-white text-[#00b4d8] shadow-sm border border-slate-200 ring-2 ring-blue-50' 
+                                : 'text-slate-400 hover:bg-white hover:text-slate-600'
+                            }`}
+                        >
+                            {i + 1}
+                        </button>
+                    ))}
+                </div>
+
+                <button 
+                    onClick={() => handlePageChange(currentPage + 1)}
+                    disabled={currentPage === totalPages}
+                    className="flex items-center gap-1 px-3 py-1.5 rounded-lg text-[12px] font-bold text-slate-500 hover:bg-white hover:text-[#00b4d8] disabled:opacity-30 disabled:hover:bg-transparent disabled:hover:text-slate-500 transition-all ml-2"
+                >
+                    Next
+                    <ChevronRight size={16} />
+                </button>
+            </div>
+        </div>
+      )}
     </div>
   );
 }

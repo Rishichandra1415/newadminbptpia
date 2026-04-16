@@ -17,7 +17,11 @@ export const navItems: NavItem[] = [
     iconPath: "M12 2C6.48 2 2 4.02 2 6.5s4.48 4.5 10 4.5 10-2.02 10-4.5S17.52 2 12 2zm0 18c-5.52 0-10-2.02-10-4.5v-3c0 2.48 4.48 4.5 10 4.5s10-2.02 10-4.5v3c0 2.48-4.48 4.5-10 4.5s-10-2.02-10-4.5v3z",
     items: [
       { title: "State", href: "/admin/master/state" },
-      { title: "City", href: "/admin/master/city" }
+      { title: "City", href: "/admin/master/city" },
+      { title: "Course", href: "/admin/master/course" },
+      { title: "Branch", href: "/admin/master/branch" },
+      { title: "Examination Center", href: "/admin/master/examination-center" }
+
     ]
   },
   { 

@@ -85,12 +85,13 @@ export function DownloadModal({
     dataToSend.append("displayOrder", (formData.displayOrder || 1).toString());
     dataToSend.append("isActive", (formData.isActive ?? true).toString());
 
-    if (formData.type === 'STUDENT_DOWNLOAD') {
-        if (selectedFile) {
-            dataToSend.append("file", selectedFile);
-        }
-    } else {
-        dataToSend.append("externalUrl", formData.externalUrl || "");
+    // Append both if they exist
+    if (selectedFile) {
+        dataToSend.append("file", selectedFile);
+    }
+    
+    if (formData.externalUrl) {
+        dataToSend.append("externalUrl", formData.externalUrl);
     }
 
     const success = await onSave(editData?.id || null, dataToSend);
@@ -219,8 +220,11 @@ export function DownloadModal({
                                     <LayoutList size={14} className="absolute left-3 top-3 text-slate-400" />
                                     <input 
                                         type="number" 
+                                        name="displayOrder"
                                         className="w-full pl-9 p-2.5 rounded-lg text-sm border border-slate-200 focus:border-[#00b4d8] outline-none" 
-                                        value={formData.displayOrder || 1} onChange={(e) => setFormData({...formData, displayOrder: parseInt(e.target.value) || 1})} 
+                                        value={formData.displayOrder || 1} 
+                                        onChange={(e) => setFormData({...formData, displayOrder: parseInt(e.target.value) || 1})} 
+                                        onWheel={(e) => (e.target as HTMLInputElement).blur()}
                                     />
                                 </div>
                             </div>
@@ -243,65 +247,85 @@ export function DownloadModal({
                     </div>
                 </div>
 
-                {/* File / URL Section */}
+                {/* Unified Attachment Section */}
                 <div className="space-y-5">
                     <div className="flex items-center gap-2">
-                        {formData.type === 'STUDENT_DOWNLOAD' ? <Upload size={16} className="text-purple-500" /> : <Globe size={16} className="text-orange-500" />}
+                        <Upload size={16} className="text-purple-500" />
                         <h3 className="text-[12px] font-bold text-slate-800 uppercase tracking-wider">
-                            {formData.type === 'STUDENT_DOWNLOAD' ? 'File Attachment' : 'Link Destination'}
+                            Attachments & Links
                         </h3>
                     </div>
 
-                    <div className="bg-slate-100/50 p-6 rounded-xl border border-slate-200 border-dashed min-h-[160px] flex flex-col justify-center">
-                        {formData.type === 'STUDENT_DOWNLOAD' ? (
-                            <div className="space-y-4">
-                                <div className="text-center space-y-2">
-                                    <div className="p-3 bg-white w-fit mx-auto rounded-full shadow-sm text-[#00b4d8] border border-slate-100 mb-2">
-                                        <Upload size={24} />
-                                    </div>
-                                    <p className="text-xs text-slate-500 font-bold">Upload PDF Document</p>
-                                    <p className="text-[10px] text-slate-400 italic">Max file size: 10MB</p>
+                    <div className="flex flex-col gap-6 p-6 bg-slate-50 border border-slate-200 border-dashed rounded-xl">
+                        {/* 1. PDF Upload Area */}
+                        <div className="space-y-4">
+                            <div className="flex items-center gap-2 mb-1">
+                                <div className="p-1.5 bg-white rounded-md border border-slate-100 shadow-sm text-[#00b4d8]">
+                                    <Upload size={14} />
                                 </div>
-                                <div className="relative group/upload">
-                                    <input 
-                                        type="file" 
-                                        accept="application/pdf"
-                                        onChange={(e) => setSelectedFile(e.target.files?.[0] || null)}
-                                        className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
-                                    />
-                                    <div className={`flex items-center gap-3 px-3 py-2.5 border rounded-lg transition-all ${
-                                        selectedFile 
-                                        ? 'border-[#3ed4b2] bg-white' 
-                                        : 'border-slate-300 bg-white group-hover/upload:border-blue-400 group-hover/upload:shadow-sm'
-                                    }`}>
-                                        <div className={`p-1.5 rounded-md ${selectedFile ? 'bg-emerald-500 text-white' : 'bg-slate-100 text-slate-400'}`}>
-                                            {selectedFile ? <CheckCircle size={14} /> : <FileText size={14} />}
-                                        </div>
-                                        <span className={`text-[11px] font-bold truncate ${selectedFile ? 'text-slate-800' : 'text-slate-500'}`}>
-                                            {selectedFile ? selectedFile.name : 'Select file to upload...'}
-                                        </span>
+                                <span className="text-[11px] font-bold text-slate-700 uppercase tracking-tight">Upload PDF Document</span>
+                            </div>
+                            
+                            <div className="relative group/upload">
+                                <input 
+                                    type="file" 
+                                    accept="application/pdf"
+                                    onChange={(e) => setSelectedFile(e.target.files?.[0] || null)}
+                                    className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
+                                />
+                                <div className={`flex items-center gap-3 px-3 py-2.5 border rounded-lg transition-all ${
+                                    selectedFile 
+                                    ? 'border-[#3ed4b2] bg-white shadow-sm' 
+                                    : 'border-slate-300 bg-white group-hover/upload:border-blue-400'
+                                }`}>
+                                    <div className={`p-1.5 rounded-md ${selectedFile ? 'bg-emerald-500 text-white' : 'bg-slate-100 text-slate-400'}`}>
+                                        {selectedFile ? <CheckCircle size={14} /> : <FileText size={14} />}
                                     </div>
+                                    <span className={`text-[11px] font-bold truncate flex-1 ${selectedFile ? 'text-slate-800' : 'text-slate-500'}`}>
+                                        {selectedFile ? selectedFile.name : 'Select file to upload...'}
+                                    </span>
+                                    {selectedFile && (
+                                        <button 
+                                            type="button"
+                                            onClick={(e) => { e.preventDefault(); e.stopPropagation(); setSelectedFile(null); }}
+                                            className="z-20 p-1 hover:bg-red-50 text-slate-300 hover:text-red-500 rounded transition-colors"
+                                        >
+                                            <X size={14} />
+                                        </button>
+                                    )}
                                 </div>
                             </div>
-                        ) : (
-                            <div className="space-y-4">
-                                <div className="space-y-1 text-left">
-                                    <label className="text-[11px] font-bold text-slate-500 uppercase tracking-tight">Full Destination URL</label>
-                                    <div className="relative">
-                                        <Globe size={14} className="absolute left-3 top-3.5 text-slate-400" />
-                                        <input 
-                                            required type="url" placeholder="https://example.com/portal" 
-                                            className="w-full pl-9 p-3 rounded-lg text-sm border border-slate-300 focus:border-orange-400 outline-none transition-all bg-white" 
-                                            value={formData.externalUrl || ""} onChange={(e) => setFormData({...formData, externalUrl: e.target.value})} 
-                                        />
-                                    </div>
-                                    <p className="flex items-center gap-1.5 text-[10px] text-amber-600 font-bold bg-amber-50 p-2 rounded-lg mt-2">
-                                        <AlertCircle size={12} />
-                                        Ensure the URL is active and starts with https://
-                                    </p>
+                        </div>
+
+                        {/* Visual Divider */}
+                        <div className="relative flex items-center py-2">
+                            <div className="flex-grow border-t border-slate-200"></div>
+                            <span className="flex-shrink mx-4 text-[10px] font-black text-slate-300 uppercase italic">AND / OR</span>
+                            <div className="flex-grow border-t border-slate-200"></div>
+                        </div>
+
+                        {/* 2. Link Destination Area */}
+                        <div className="space-y-4">
+                            <div className="flex items-center gap-2 mb-1">
+                                <div className="p-1.5 bg-white rounded-md border border-slate-100 shadow-sm text-orange-500">
+                                    <Globe size={14} />
                                 </div>
+                                <span className="text-[11px] font-bold text-slate-700 uppercase tracking-tight">Destination Link (URL)</span>
                             </div>
-                        )}
+                            
+                            <div className="relative">
+                                <LinkIcon size={14} className="absolute left-3 top-3.5 text-slate-400" />
+                                <input 
+                                    type="url" placeholder="https://example.com/resource-link" 
+                                    className="w-full pl-9 p-3 rounded-lg text-sm border border-slate-300 focus:border-orange-400 outline-none transition-all bg-white shadow-sm" 
+                                    value={formData.externalUrl || ""} onChange={(e) => setFormData({...formData, externalUrl: e.target.value})} 
+                                />
+                            </div>
+                            <p className="text-[10px] text-slate-400 font-medium ml-1 flex items-center gap-1.5">
+                                <AlertCircle size={10} className="text-amber-500" />
+                                Paste full URL starting with http:// or https://
+                            </p>
+                        </div>
                     </div>
                 </div>
             </section>

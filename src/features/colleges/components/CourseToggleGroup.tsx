@@ -17,7 +17,8 @@ const DISCIPLINES = {
     { code: 'CSE', label: 'Comp' },
     { code: 'EEE', label: 'EEE' },
     { code: 'ECE', label: 'ECE' },
-    { code: 'BE', label: 'BE' },
+    { code: 'IT', label: 'IT' },
+    { code: 'AI', label: 'AI' }
   ],
   polytechnic: [
     { code: 'CE', label: 'Civ' },
@@ -25,9 +26,9 @@ const DISCIPLINES = {
     { code: 'EE', label: 'Elec' },
     { code: 'CSE', label: 'Comp' },
     { code: 'ECE', label: 'ECE' },
-    { code: 'Auto', label: 'Auto' },
   ]
 };
+
 
 export function CourseToggleGroup({ 
   category, 

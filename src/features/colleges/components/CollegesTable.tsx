@@ -8,25 +8,33 @@ import {
     MapPin, Phone, 
     Mail, ExternalLink,
     ShieldCheck, EyeOff,
-    ChevronLeft, ChevronRight
+    ChevronLeft, ChevronRight,
+    Filter
 } from 'lucide-react';
-import { CollegesTableProps, College } from "../types";
+import { CollegesTableProps, College, CollegeType } from "../types";
 import { CourseToggleGroup } from "./CourseToggleGroup";
 import { capitalizeWords } from "@/shared/utils/string-utils";
 
+interface ExtendedCollegesTableProps extends Omit<CollegesTableProps, 'category'> {
+    filter: 'ALL' | CollegeType;
+    onFilterChange: (filter: 'ALL' | CollegeType) => void;
+}
+
 export function CollegesTable({
   data,
-  category,
+  filter,
+  onFilterChange,
   onDelete,
   onToggleStatus,
   onToggleCourse,
   onEdit,
   onRefresh
-}: CollegesTableProps) {
+}: ExtendedCollegesTableProps) {
   const [searchTerm, setSearchTerm] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const pageSize = 7;
 
+  // Search Logic
   const filteredData = data.filter(item => 
     item.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
     item.code.toLowerCase().includes(searchTerm.toLowerCase())
@@ -51,19 +59,20 @@ export function CollegesTable({
       <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-4 pb-2 shrink-0">
         <div className="w-full md:w-auto text-left">
           <h1 className="text-2xl md:text-3xl font-light text-[#00b4d8] mb-1 tracking-wide">
-            {category === 'engineering' ? 'Engineering Colleges' : 'Polytechnic Colleges'}
+            Educational Institutions
           </h1>
           <div className="flex items-center gap-2 text-[10px] md:text-[11px] font-medium text-slate-400 tracking-widest uppercase">
             <span>APP</span>
             <span className="text-slate-300">&gt;</span>
             <span>COLLEGES</span>
             <span className="text-slate-300">&gt;</span>
-            <span className="text-slate-800 uppercase">{category}</span>
+            <span className="text-slate-800 uppercase">{filter === 'ALL' ? 'ALL ARCHIVES' : filter}</span>
           </div>
         </div>
         
         {/* Actions */}
         <div className="flex flex-wrap items-center gap-2 w-full md:w-auto">
+          
           <div className="flex flex-grow md:flex-grow-0 items-center bg-white px-3 py-2 rounded-md border border-slate-200 shadow-sm h-10 w-full md:w-72">
             <Search className="text-slate-400 mr-2 shrink-0" size={16} />
             <input 
@@ -77,6 +86,22 @@ export function CollegesTable({
             />
           </div>
 
+          <div className="flex items-center bg-white px-3 py-1 rounded-md border border-slate-200 shadow-sm h-10">
+            <Filter className="text-slate-400 mr-2" size={14} />
+            <select 
+                className="text-xs bg-transparent border-none outline-none font-semibold text-slate-600 cursor-pointer"
+                value={filter}
+                onChange={(e) => {
+                    onFilterChange(e.target.value as any);
+                    setCurrentPage(1);
+                }}
+            >
+                <option value="ALL">All Categories</option>
+                <option value="ENGINEERING">Engineering</option>
+                <option value="POLYTECHNIC">Polytechnic</option>
+            </select>
+          </div>
+
           <button 
             onClick={onRefresh}
             className="p-2.5 bg-white border border-slate-200 shadow-sm rounded-md text-slate-400 hover:text-slate-600 transition-colors h-10"
@@ -88,7 +113,7 @@ export function CollegesTable({
           <button 
             onClick={() => onEdit?.({} as College)}
             className="bg-[#0e8bf1] hover:bg-[#0b73c9] text-white p-2.5 rounded-full shadow-md shadow-blue-200 transition-transform hover:scale-105 shrink-0 h-10 w-10 flex items-center justify-center ml-auto md:ml-0"
-            title="Register New College"
+            title="Register New Institution"
           >
             <Plus size={20} strokeWidth={2.5} />
           </button>
@@ -126,6 +151,17 @@ export function CollegesTable({
                             <span className="font-bold text-slate-800 text-[14px] leading-tight truncate-two-lines whitespace-normal pr-4">
                                 {capitalizeWords(college.name)}
                             </span>
+                            
+                            {filter === 'ALL' && (
+                              <div className="flex items-center gap-2 mb-1">
+                                <span className={`text-[9px] font-bold px-1.5 py-0.5 rounded ${
+                                  college.type === 'ENGINEERING' ? 'bg-indigo-50 text-indigo-500 border border-indigo-100' : 'bg-orange-50 text-orange-500 border border-orange-100'
+                                }`}>
+                                  {college.type}
+                                </span>
+                              </div>
+                            )}
+
                             <div className="flex items-center gap-3 mt-1.5 overflow-hidden">
                                 <div className="flex items-center gap-1.5 text-[11px] text-slate-500">
                                     <Phone size={10} className="text-[#00b4d8]" />
@@ -143,9 +179,30 @@ export function CollegesTable({
                   {/* Inline Course Toggles */}
                   <td className="p-3 md:p-4">
                     <div className="flex flex-col gap-2">
-                        <span className="text-[9px] font-bold text-slate-300 uppercase tracking-widest pl-1">Toggle Disciplines</span>
+                        <div className="flex items-center justify-between px-1">
+                          <span className="text-[9px] font-bold text-slate-300 uppercase tracking-widest italic">Management & Disciplines</span>
+                          {Object.values(college.courseMatrix).filter(c => c.isEnabled).length > 0 && (
+                            <span className="text-[10px] bg-blue-50 text-blue-600 px-1.5 py-0.5 rounded font-black border border-blue-100">
+                              {Object.values(college.courseMatrix).filter(c => c.isEnabled).length} ACTIVE
+                            </span>
+                          )}
+                        </div>
+                        
+                        {/* List of active departments */}
+                        <div className="flex flex-wrap gap-1 mb-1">
+                          {Object.entries(college.courseMatrix)
+                            .filter(([_, data]) => data.isEnabled)
+                            .map(([code, data]) => (
+                                <span key={code} className="text-[10px] font-bold text-slate-500 bg-slate-100 px-1.5 py-0.5 rounded border border-slate-200">
+                                  {code} <span className="text-blue-500 ml-0.5">{data.seats}</span>
+                                </span>
+                            ))}
+                          {Object.values(college.courseMatrix).filter(c => c.isEnabled).length === 0 && (
+                            <span className="text-[10px] text-slate-400 italic font-medium px-1">No disciplines active</span>
+                          )}
+                        </div>
                         <CourseToggleGroup 
-                          category={category}
+                          category={college.type?.toLowerCase() as 'engineering' | 'polytechnic'}
                           selectedCourses={college.courseMatrix}
                           onToggle={(code) => onToggleCourse?.(college.id, code)}
                         />

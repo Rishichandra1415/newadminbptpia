@@ -1,10 +1,16 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { X, Save, School, MapPin, Globe, Mail, Phone, GraduationCap, DollarSign, FileText } from "lucide-react";
-import { College } from "../types";
-import { CourseToggleGroup } from "./CourseToggleGroup";
+import { X, Save, School, MapPin, Globe, Mail, Phone, GraduationCap, DollarSign, FileText, FileBadge } from "lucide-react";
+import { College, CollegeType } from "../types";
 import { capitalizeWords } from "@/shared/utils/string-utils";
+import { http } from "@/shared/api/api-client";
+import { API_ENDPOINTS } from "@/shared/api/api-endpoints";
+
+interface LocationItem {
+  id: number;
+  name: string;
+}
 
 interface CollegeModalProps {
   isOpen: boolean;
@@ -18,8 +24,9 @@ export function CollegeModal({ isOpen, onClose, onSave, category, editData }: Co
   const [formData, setFormData] = useState<Partial<College>>({
     name: "",
     code: "",
-    totalSeats: 0,
+    totalIntake: 0,
     address: "",
+    city: "",
     district: "",
     state: "Bihar",
     contacts: [""],
@@ -27,8 +34,13 @@ export function CollegeModal({ isOpen, onClose, onSave, category, editData }: Co
     website: "",
     feesInfo: "",
     category: category,
+    type: category.toUpperCase() as CollegeType,
     courseMatrix: {}
   });
+
+  const [states, setStates] = useState<LocationItem[]>([]);
+  const [districts, setDistricts] = useState<LocationItem[]>([]);
+  const [loadingLocations, setLoadingLocations] = useState(false);
 
   useEffect(() => {
     if (editData && editData.id) {
@@ -37,8 +49,9 @@ export function CollegeModal({ isOpen, onClose, onSave, category, editData }: Co
       setFormData({
         name: "",
         code: "",
-        totalSeats: 0,
+        totalIntake: 0,
         address: "",
+        city: "",
         district: "",
         state: "Bihar",
         contacts: [""],
@@ -46,10 +59,59 @@ export function CollegeModal({ isOpen, onClose, onSave, category, editData }: Co
         website: "",
         feesInfo: "",
         category: category,
+        type: category.toUpperCase() as CollegeType,
         courseMatrix: {}
       });
     }
   }, [editData, category, isOpen]);
+
+  // Fetch States on mount
+  useEffect(() => {
+    const fetchStates = async () => {
+      try {
+        const response = await http.get<{ success: boolean; data: LocationItem[] }>(API_ENDPOINTS.MASTER.STATES);
+        if (response.success) {
+          setStates(response.data);
+          
+          // If we have an initial state (like 'Bihar'), find its ID and fetch districts
+          const initialState = response.data.find(s => s.name === (editData?.state || "Bihar"));
+          if (initialState) {
+            fetchDistricts(initialState.id);
+          }
+        }
+      } catch (error) {
+        console.error("Failed to fetch states", error);
+      }
+    };
+
+    if (isOpen) {
+      fetchStates();
+    }
+  }, [isOpen]);
+
+  const fetchDistricts = async (stateId: number) => {
+    setLoadingLocations(true);
+    try {
+      const response = await http.get<{ success: boolean; data: LocationItem[] }>(`${API_ENDPOINTS.MASTER.CITIES}/${stateId}`);
+      if (response.success) {
+        setDistricts(response.data);
+      }
+    } catch (error) {
+      console.error("Failed to fetch districts", error);
+    } finally {
+      setLoadingLocations(false);
+    }
+  };
+
+  const handleStateChange = (stateName: string) => {
+    const selectedState = states.find(s => s.name === stateName);
+    setFormData(prev => ({ ...prev, state: stateName, district: "" }));
+    if (selectedState) {
+      fetchDistricts(selectedState.id);
+    } else {
+      setDistricts([]);
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -58,6 +120,8 @@ export function CollegeModal({ isOpen, onClose, onSave, category, editData }: Co
   };
 
   if (!isOpen) return null;
+
+  const currentType = formData.category || category;
 
   const toggleCourseInModal = (code: string) => {
     const current = formData.courseMatrix?.[code] || { isEnabled: false, seats: 0 };
@@ -92,7 +156,7 @@ export function CollegeModal({ isOpen, onClose, onSave, category, editData }: Co
               <School size={20} />
             </div>
             <h2 className="text-xl font-bold text-slate-800">
-              {editData?.id ? 'Edit College Details' : `Register New ${capitalize(category)} College`}
+              {editData?.id ? 'Edit Institution Details' : `Register New ${capitalize(currentType)} Institution`}
             </h2>
           </div>
           <button onClick={onClose} className="text-slate-400 hover:text-red-500 transition-colors p-2 rounded-full hover:bg-slate-50">
@@ -110,9 +174,27 @@ export function CollegeModal({ isOpen, onClose, onSave, category, editData }: Co
                 <h3 className="text-[#00b4d8] text-[11px] font-bold tracking-widest uppercase flex items-center gap-2 border-b pb-2">
                   <School size={14} /> Institution Identity
                 </h3>
+                
+                {/* Type Selection */}
+                <div className="space-y-1">
+                  <label className="text-[11px] font-bold text-slate-500 uppercase tracking-tight">Institution Category</label>
+                  <select 
+                    className="w-full p-2.5 rounded-lg text-sm border border-slate-200 focus:border-[#00b4d8] outline-none bg-white font-medium"
+                    value={formData.category}
+                    onChange={(e) => setFormData({
+                      ...formData, 
+                      category: e.target.value as any,
+                      type: e.target.value.toUpperCase() as CollegeType
+                    })}
+                  >
+                    <option value="engineering">Engineering College</option>
+                    <option value="polytechnic">Polytechnic College</option>
+                  </select>
+                </div>
+
                 <div className="grid grid-cols-3 gap-4">
                   <div className="col-span-2 space-y-1">
-                    <label className="text-[11px] font-bold text-slate-500 uppercase tracking-tight">College Full Name</label>
+                    <label className="text-[11px] font-bold text-slate-500 uppercase tracking-tight">Full Name</label>
                     <input 
                       required type="text" placeholder="e.g. RPS Institute of Technology" 
                       className="w-full p-2.5 rounded-lg text-sm border border-slate-200 focus:border-[#00b4d8] outline-none transition-all" 
@@ -132,11 +214,12 @@ export function CollegeModal({ isOpen, onClose, onSave, category, editData }: Co
 
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-1">
-                    <label className="text-[11px] font-bold text-slate-500 uppercase tracking-tight">Total Intake Seats</label>
+                    <label className="text-[11px] font-bold text-slate-500 uppercase tracking-tight">Total Intake</label>
                     <input 
                       type="number" placeholder="360" 
-                      className="w-full p-2.5 rounded-lg text-sm border border-slate-200 focus:border-[#00b4d8] outline-none" 
-                      value={formData.totalSeats || 0} onChange={(e) => setFormData({...formData, totalSeats: Number(e.target.value)})} 
+                      className="w-full p-2.5 rounded-lg text-sm border border-slate-200 focus:border-[#00b4d8] outline-none bg-slate-50 font-semibold" 
+                      value={formData.totalIntake || 0} 
+                      readOnly
                     />
                   </div>
                   <div className="space-y-1">
@@ -155,10 +238,47 @@ export function CollegeModal({ isOpen, onClose, onSave, category, editData }: Co
 
               <section className="space-y-4">
                 <h3 className="text-amber-500 text-[11px] font-bold tracking-widest uppercase flex items-center gap-2 border-b pb-2">
-                  <Phone size={14} /> Connectivity & Location
+                  <MapPin size={14} /> Connectivity & Location
                 </h3>
+                <div className="grid grid-cols-3 gap-4">
+                    <div className="space-y-1">
+                        <label className="text-[11px] font-bold text-slate-500 uppercase tracking-tight">State</label>
+                        <select 
+                            className="w-full p-2.5 rounded-lg text-sm border border-slate-200 focus:border-[#00b4d8] outline-none bg-white font-medium" 
+                            value={formData.state || ""} 
+                            onChange={(e) => handleStateChange(e.target.value)}
+                        >
+                            <option value="">Select State</option>
+                            {states.map(s => (
+                              <option key={s.id} value={s.name}>{s.name}</option>
+                            ))}
+                        </select>
+                    </div>
+                    <div className="space-y-1">
+                        <label className="text-[11px] font-bold text-slate-500 uppercase tracking-tight">District</label>
+                        <select 
+                            className="w-full p-2.5 rounded-lg text-sm border border-slate-200 focus:border-[#00b4d8] outline-none bg-white font-medium" 
+                            value={formData.district || ""} 
+                            onChange={(e) => setFormData({...formData, district: e.target.value})}
+                            disabled={!formData.state || loadingLocations}
+                        >
+                            <option value="">Select District</option>
+                            {districts.map(d => (
+                              <option key={d.id} value={d.name}>{d.name}</option>
+                            ))}
+                        </select>
+                    </div>
+                    <div className="space-y-1">
+                        <label className="text-[11px] font-bold text-slate-500 uppercase tracking-tight">City</label>
+                        <input 
+                            type="text" placeholder="Patna" 
+                            className="w-full p-2.5 rounded-lg text-sm border border-slate-200 focus:border-[#00b4d8] outline-none" 
+                            value={formData.city || ""} onChange={(e) => setFormData({...formData, city: e.target.value})} 
+                        />
+                    </div>
+                </div>
                 <div className="space-y-1">
-                  <label className="text-[11px] font-bold text-slate-500 uppercase tracking-tight">Official Email Address</label>
+                  <label className="text-[11px] font-bold text-slate-500 uppercase tracking-tight">Official Email</label>
                   <div className="relative">
                     <Mail size={14} className="absolute left-3 top-3 text-slate-400" />
                     <input 
@@ -169,13 +289,16 @@ export function CollegeModal({ isOpen, onClose, onSave, category, editData }: Co
                   </div>
                 </div>
                 <div className="space-y-1">
-                  <label className="text-[11px] font-bold text-slate-500 uppercase tracking-tight">Contact Numbers (Primary / Secondary)</label>
-                  <input 
-                    type="text" placeholder="9876543210, 9876543211" 
-                    className="w-full p-2.5 rounded-lg text-sm border border-slate-200 focus:border-[#00b4d8] outline-none" 
-                    value={formData.contacts?.join(", ") || ""} 
-                    onChange={(e) => setFormData({...formData, contacts: e.target.value.split(",").map(c => c.trim())})} 
-                  />
+                  <label className="text-[11px] font-bold text-slate-500 uppercase tracking-tight">Contact Numbers (Comma separated)</label>
+                  <div className="relative">
+                    <Phone size={14} className="absolute left-3 top-3 text-slate-400" />
+                    <input 
+                        type="text" placeholder="9876543210, 9876543211" 
+                        className="w-full pl-9 p-2.5 rounded-lg text-sm border border-slate-200 focus:border-[#00b4d8] outline-none" 
+                        value={formData.contacts?.join(", ") || ""} 
+                        onChange={(e) => setFormData({...formData, contacts: e.target.value.split(",").map(c => c.trim())})} 
+                    />
+                  </div>
                 </div>
                 <div className="space-y-1">
                   <label className="text-[11px] font-bold text-slate-500 uppercase tracking-tight">Complete Mailing Address</label>
@@ -192,17 +315,20 @@ export function CollegeModal({ isOpen, onClose, onSave, category, editData }: Co
             {/* Courses & Fees */}
             <div className="space-y-6 bg-slate-50/50 p-4 rounded-xl border border-slate-100">
               <section className="space-y-4">
-                <h3 className="text-emerald-500 text-[11px] font-bold tracking-widest uppercase flex items-center gap-2 border-b pb-2">
-                  <GraduationCap size={16} /> Course Management Matrix
-                </h3>
-                <p className="text-[10px] text-slate-400 font-medium bg-white p-2 rounded border border-slate-100 italic">
-                  Select available disciplines and assign planned seat intake for each.
-                </p>
-                <div className="space-y-4 max-h-[220px] overflow-y-auto pr-2 custom-scrollbar">
-                  {DISCIPLINES[category].map(disc => {
+                <div className="flex justify-between items-center border-b pb-2">
+                    <h3 className="text-emerald-500 text-[11px] font-bold tracking-widest uppercase flex items-center gap-2">
+                    <GraduationCap size={16} /> Course matrix
+                    </h3>
+                    <span className="text-[10px] bg-emerald-100 text-emerald-700 px-2 py-0.5 rounded-full font-bold">
+                        {capitalize(currentType)}
+                    </span>
+                </div>
+                
+                <div className="space-y-3 max-h-[300px] overflow-y-auto pr-2 custom-scrollbar">
+                  {(DISCIPLINES[currentType] || []).map(disc => {
                     const isSelected = !!formData.courseMatrix?.[disc.code]?.isEnabled;
                     return (
-                      <div key={disc.code} className={`flex items-center justify-between p-2 rounded-lg border transition-all ${isSelected ? 'bg-white border-blue-100 shadow-sm' : 'bg-transparent border-slate-200 opacity-60'}`}>
+                      <div key={disc.code} className={`flex items-center justify-between p-3 rounded-lg border transition-all ${isSelected ? 'bg-white border-blue-100 shadow-sm ring-1 ring-blue-50' : 'bg-transparent border-slate-200 opacity-60'}`}>
                         <div className="flex items-center gap-3">
                           <input 
                             type="checkbox" 
@@ -210,17 +336,31 @@ export function CollegeModal({ isOpen, onClose, onSave, category, editData }: Co
                             checked={isSelected}
                             onChange={() => toggleCourseInModal(disc.code)}
                           />
-                          <span className="text-sm font-bold text-slate-700">{disc.code} <small className="text-slate-400 font-normal ml-1">({disc.label})</small></span>
+                          <div className="flex flex-col">
+                            <span className="text-sm font-bold text-slate-700">{disc.code}</span>
+                            <span className="text-[10px] text-slate-400 font-medium">{disc.label}</span>
+                          </div>
                         </div>
-                        <div className="flex items-center gap-2">
-                          <label className="text-[10px] font-bold text-slate-400 uppercase">Intake:</label>
+                        <div className="flex items-center gap-3">
+                          <label className="text-[10px] font-bold text-slate-400 uppercase">Seats:</label>
                           <input 
                             type="number" 
                             disabled={!isSelected}
                             placeholder="0"
-                            className="w-16 p-1 text-center text-xs border rounded outline-none focus:border-blue-400 disabled:bg-slate-50"
+                            className="w-20 p-1.5 text-center text-xs border rounded-md outline-none focus:border-blue-400 disabled:bg-slate-50 font-bold"
                             value={formData.courseMatrix?.[disc.code]?.seats || 0}
-                            onChange={(e) => updateCourseSeats(disc.code, Number(e.target.value))}
+                            onChange={(e) => {
+                                const newSeats = Number(e.target.value);
+                                updateCourseSeats(disc.code, newSeats);
+                                
+                                // Update total intake
+                                let newTotal = 0;
+                                const matrix = { ...formData.courseMatrix, [disc.code]: { ...formData.courseMatrix?.[disc.code], seats: newSeats, isEnabled: true } };
+                                Object.values(matrix).forEach((v: any) => {
+                                    if (v.isEnabled) newTotal += (v.seats || 0);
+                                });
+                                setFormData(prev => ({ ...prev, courseMatrix: matrix, totalIntake: newTotal }));
+                            }}
                           />
                         </div>
                       </div>
@@ -236,15 +376,15 @@ export function CollegeModal({ isOpen, onClose, onSave, category, editData }: Co
                 <div className="space-y-1">
                   <label className="text-[11px] font-bold text-slate-500 uppercase tracking-tight">Fee Details Description</label>
                   <textarea 
-                    rows={2} placeholder="e.g. 42,500/- Per Semester + Admission Fee 5000/- One Time" 
+                    rows={2} placeholder="e.g. 42,500/- Per Semester..." 
                     className="w-full p-2.5 rounded-lg text-sm border border-slate-200 focus:border-[#00b4d8] outline-none resize-none" 
                     value={formData.feesInfo || ""} onChange={(e) => setFormData({...formData, feesInfo: e.target.value})} 
                   />
                 </div>
                 <div className="space-y-1">
-                  <label className="text-[11px] font-bold text-slate-500 uppercase tracking-tight">Brochure Link / Attachment URL</label>
+                  <label className="text-[11px] font-bold text-slate-500 uppercase tracking-tight">Brochure Link</label>
                   <div className="relative">
-                    <FileText size={14} className="absolute left-3 top-3 text-slate-400" />
+                    <FileBadge size={14} className="absolute left-3 top-3 text-slate-400" />
                     <input 
                       type="text" placeholder="https://..." 
                       className="w-full pl-9 p-2.5 rounded-lg text-sm border border-slate-200 focus:border-[#00b4d8] outline-none" 
@@ -261,13 +401,13 @@ export function CollegeModal({ isOpen, onClose, onSave, category, editData }: Co
         {/* Footer */}
         <div className="px-6 py-4 border-t border-slate-100 bg-white flex justify-end gap-3 shrink-0 rounded-b-xl">
           <button onClick={onClose} className="px-6 py-2.5 bg-white border border-slate-200 text-slate-600 rounded-lg text-[13px] font-bold hover:bg-slate-50 transition-colors">
-            Discard Changes
+            Discard
           </button>
           <button 
             type="submit" form="collegeForm"
             className="px-8 py-2.5 bg-[#0e8bf1] text-white rounded-lg text-[13px] font-bold hover:bg-[#0b73c9] transition-all flex items-center gap-2 shadow-lg shadow-blue-100 hover:scale-[1.02] active:scale-[0.98]"
           >
-            <Save size={16} /> Update Institution
+            <Save size={16} /> {editData?.id ? 'Update' : 'Save'} Institution
           </button>
         </div>
       </div>
@@ -275,14 +415,15 @@ export function CollegeModal({ isOpen, onClose, onSave, category, editData }: Co
   );
 }
 
-const DISCIPLINES = {
+const DISCIPLINES: Record<string, { code: string; label: string }[]> = {
   engineering: [
     { code: 'CE', label: 'Civil' },
     { code: 'ME', label: 'Mechanical' },
     { code: 'CSE', label: 'Computer Science' },
     { code: 'EEE', label: 'Electrical & Electronics' },
     { code: 'ECE', label: 'Electronics & Comm.' },
-    { code: 'BE', label: 'Bio Engineering' },
+    { code: 'IT', label: 'Information Technology' },
+    { code: 'AI', label: 'AI & Machine Learning' },
   ],
   polytechnic: [
     { code: 'CE', label: 'Civil' },
@@ -290,10 +431,11 @@ const DISCIPLINES = {
     { code: 'EE', label: 'Electrical' },
     { code: 'CSE', label: 'Computer Science' },
     { code: 'ECE', label: 'Electronics & Comm.' },
-    { code: 'Auto', label: 'Automobile' },
   ]
 };
 
 function capitalize(s: string) {
+  if (!s) return "";
   return s.charAt(0).toUpperCase() + s.slice(1);
 }
+

@@ -1,128 +1,201 @@
-import { useState, useCallback, useMemo } from "react";
-import { College } from "../types";
+import { useState, useCallback, useEffect } from "react";
+import { College, CollegeType } from "../types";
+import { http } from "@/shared/api/api-client";
+import { API_ENDPOINTS } from "@/shared/api/api-endpoints";
 
-const INITIAL_ENGINEERING_COLLEGES: College[] = [
-  {
-    id: 1,
-    name: "R.P Sharma Institute of Technology",
-    code: "139",
-    totalSeats: 360,
-    address: "Saguna More, Khagaul Road, Danapur, Patna.",
-    district: "Patna",
-    state: "Bihar",
-    contacts: ["9798333308", "9798999946"],
-    email: "info@rpsit.org.in",
-    website: "www.rpsit.org.in",
-    feesInfo: "42,500/- Per Semester + Admission Fee 5000/- One Time",
-    category: "engineering",
-    isActive: true,
-    courseMatrix: {
-      "CE": { isEnabled: true, seats: 90 },
-      "ME": { isEnabled: true, seats: 60 },
-      "EEE": { isEnabled: true, seats: 60 },
-      "ECE": { isEnabled: true, seats: 30 },
-      "CSE": { isEnabled: true, seats: 120 },
-    }
-  },
-  {
-    id: 2,
-    name: "Netaji Subhas Institute of Technology",
-    code: "124",
-    totalSeats: 480,
-    address: "Amhara, Bihta, Patna.",
-    district: "Patna",
-    state: "Bihar",
-    contacts: ["7781020346", "7781020347"],
-    email: "info@nsit.in",
-    website: "www.nsit.in",
-    feesInfo: "45,000/- Per Semester",
-    category: "engineering",
-    isActive: true,
-    courseMatrix: {
-      "CE": { isEnabled: true, seats: 120 },
-      "ME": { isEnabled: false, seats: 60 },
-      "CSE": { isEnabled: true, seats: 180 },
-    }
+/**
+ * Maps backend intake fields to frontend courseMatrix
+ */
+const mapFromBackend = (college: any): College => {
+  const courseMatrix: Record<string, { isEnabled: boolean; seats: number }> = {};
+  const branches = ["CE", "ME", "EE", "EEE", "ECE", "CSE", "IT", "AI"];
+  
+  branches.forEach(branch => {
+    const val = college[`intake${branch}`];
+    courseMatrix[branch] = {
+      isEnabled: val !== undefined && val !== null && val !== "-",
+      seats: parseInt(val as string) || 0
+    };
+  });
+  
+  return {
+    ...college,
+    courseMatrix,
+    isActive: college.status === 'ACTIVE',
+    contacts: college.telephone ? college.telephone.split(',').map((s: string) => s.trim()) : [],
+    category: (college.type?.toLowerCase() || 'engineering') as 'engineering' | 'polytechnic',
+    feesInfo: college.fees || "",
+  };
+};
+
+/**
+ * Maps frontend state to backend expected payload
+ */
+const mapToBackend = (data: Partial<College>) => {
+  const payload: any = { ...data };
+  
+  // Map courseMatrix to intake fields
+  if (data.courseMatrix) {
+    Object.entries(data.courseMatrix).forEach(([code, info]) => {
+      payload[`intake${code}`] = info.isEnabled ? info.seats.toString() : "-";
+    });
   }
-];
 
-const INITIAL_POLYTECHNIC_COLLEGES: College[] = [
-  {
-    id: 101,
-    name: "Ganga Memorial College of Polytechnic",
-    code: "502",
-    totalSeats: 300,
-    address: "Harnaut, Nalanda.",
-    district: "Nalanda",
-    state: "Bihar",
-    contacts: ["9334114400"],
-    email: "gmcp@gmail.com",
-    website: "www.gangamemorial.com",
-    feesInfo: "30,000/- Per Semester",
-    category: "polytechnic",
-    isActive: true,
-    courseMatrix: {
-      "CE": { isEnabled: true, seats: 120 },
-      "ME": { isEnabled: true, seats: 120 },
-      "EE": { isEnabled: true, seats: 60 },
-    }
+  // Map telephone
+  if (data.contacts) {
+    payload.telephone = data.contacts.join(", ");
   }
-];
 
-export function useColleges(category: 'engineering' | 'polytechnic') {
-  const [colleges, setColleges] = useState<College[]>(() => 
-    category === 'engineering' ? INITIAL_ENGINEERING_COLLEGES : INITIAL_POLYTECHNIC_COLLEGES
-  );
-  const [isLoading, setIsLoading] = useState(false);
+  // Map feesInfo back to fees
+  if (data.feesInfo !== undefined) {
+    payload.fees = data.feesInfo;
+  }
+
+  // Ensure type is uppercase
+  if (data.category) {
+    payload.type = data.category.toUpperCase();
+  }
+
+  return payload;
+};
+
+export function useColleges(initialFilter: 'ALL' | 'ENGINEERING' | 'POLYTECHNIC' = 'ALL') {
+  const [colleges, setColleges] = useState<College[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [currentFilter, setCurrentFilter] = useState(initialFilter);
+
+  const fetchColleges = useCallback(async () => {
+    setIsLoading(true);
+    try {
+      let url = `${API_ENDPOINTS.COLLEGES}?limit=100`;
+      if (currentFilter !== 'ALL') {
+        url += `&type=${currentFilter}`;
+      }
+      
+      const response = await http.get<{ success: boolean; data: any[] }>(url);
+      if (response.success) {
+        setColleges(response.data.map(mapFromBackend));
+      }
+    } catch (err: any) {
+      setError(err.message);
+    } finally {
+      setIsLoading(false);
+    }
+  }, [currentFilter]);
+
+  useEffect(() => {
+    fetchColleges();
+  }, [fetchColleges]);
+
+  const setFilter = (filter: 'ALL' | 'ENGINEERING' | 'POLYTECHNIC') => {
+    setCurrentFilter(filter);
+  };
 
   const toggleCourse = useCallback(async (collegeId: number, courseCode: string) => {
-    setColleges(prev => prev.map(c => {
-      if (c.id === collegeId) {
-        const current = c.courseMatrix[courseCode] || { isEnabled: false, seats: 0 };
-        return {
-          ...c,
-          courseMatrix: {
-            ...c.courseMatrix,
-            [courseCode]: { ...current, isEnabled: !current.isEnabled }
-          }
-        };
+    const college = colleges.find(c => c.id === collegeId);
+    if (!college) return;
+
+    const current = college.courseMatrix[courseCode] || { isEnabled: false, seats: 0 };
+    const updatedMatrix = {
+      ...college.courseMatrix,
+      [courseCode]: { ...current, isEnabled: !current.isEnabled }
+    };
+
+    try {
+      const payload = mapToBackend({ courseMatrix: updatedMatrix });
+      const response = await http.put<{ success: boolean; data: any }>(
+        `${API_ENDPOINTS.COLLEGES}/${collegeId}`,
+        payload
+      );
+      if (response.success) {
+        setColleges(prev => prev.map(c => c.id === collegeId ? mapFromBackend(response.data) : c));
       }
-      return c;
-    }));
-  }, []);
+    } catch (err) {
+      console.error("Failed to toggle course", err);
+    }
+  }, [colleges]);
 
   const toggleStatus = useCallback(async (id: number) => {
-    setColleges(prev => prev.map(c => 
-      c.id === id ? { ...c, isActive: !c.isActive } : c
-    ));
-  }, []);
+    const college = colleges.find(c => c.id === id);
+    if (!college) return;
+
+    const newStatus = college.status === 'ACTIVE' ? 'INACTIVE' : 'ACTIVE';
+    try {
+      const response = await http.patch<{ success: boolean; data: any }>(
+        `${API_ENDPOINTS.COLLEGES}/${id}/status`,
+        { status: newStatus }
+      );
+      if (response.success) {
+        setColleges(prev => prev.map(c => c.id === id ? mapFromBackend(response.data) : c));
+      }
+    } catch (err) {
+      console.error("Failed to toggle status", err);
+    }
+  }, [colleges]);
 
   const deleteCollege = useCallback(async (id: number) => {
-    if (confirm("Are you sure you want to delete this college?")) {
+    if (!confirm("Are you sure you want to delete this college?")) return;
+    
+    try {
+      const response = await http.delete<{ success: boolean }>(`${API_ENDPOINTS.COLLEGES}/${id}`);
+      if (response.success) {
         setColleges(prev => prev.filter(c => c.id !== id));
+      }
+    } catch (err) {
+      console.error("Failed to delete college", err);
     }
   }, []);
 
   const saveCollege = useCallback(async (id: number | null, data: Partial<College>) => {
-    if (id) {
-       setColleges(prev => prev.map(c => c.id === id ? { ...c, ...data } : c));
-    } else {
-       const newCollege: College = {
-         ...(data as College),
-         id: Date.now(),
-         isActive: true,
-       };
-       setColleges(prev => [...prev, newCollege]);
+    try {
+      const payload = mapToBackend(data);
+      let response;
+      
+      if (id) {
+        response = await http.put<{ success: boolean; data: any }>(
+          `${API_ENDPOINTS.COLLEGES}/${id}`,
+          payload
+        );
+      } else {
+        // If specific filtered list, default to that type
+        if (!payload.type && currentFilter !== 'ALL') payload.type = currentFilter;
+        // Default to Engineering if somehow still missing
+        if (!payload.type) payload.type = 'ENGINEERING';
+        
+        response = await http.post<{ success: boolean; data: any }>(
+          `${API_ENDPOINTS.COLLEGES}`,
+          payload
+        );
+      }
+
+      if (response.success) {
+        if (id) {
+          setColleges(prev => prev.map(c => c.id === id ? mapFromBackend(response.data) : c));
+        } else {
+          setColleges(prev => [...prev, mapFromBackend(response.data)]);
+        }
+        return true;
+      }
+      return false;
+    } catch (err) {
+      console.error("Failed to save college", err);
+      return false;
     }
-    return true;
-  }, []);
+  }, [currentFilter]);
 
   return {
     colleges,
     isLoading,
+    error,
+    currentFilter,
+    setFilter,
     toggleCourse,
     toggleStatus,
     deleteCollege,
-    saveCollege
+    saveCollege,
+    refresh: fetchColleges
   };
 }
+
+

@@ -14,8 +14,10 @@ export default function PolytechnicCollegesPage() {
     toggleCourse, 
     toggleStatus, 
     deleteCollege, 
-    saveCollege 
-  } = useColleges('polytechnic');
+    saveCollege,
+    refresh,
+    error 
+  } = useColleges('POLYTECHNIC');
 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingCollege, setEditingCollege] = useState<College | null>(null);
@@ -23,6 +25,11 @@ export default function PolytechnicCollegesPage() {
 
   const handleEdit = (college: College) => {
     setEditingCollege(college);
+    setIsModalOpen(true);
+  };
+
+  const handleCreate = () => {
+    setEditingCollege(null);
     setIsModalOpen(true);
   };
 
@@ -50,12 +57,13 @@ export default function PolytechnicCollegesPage() {
       ) : (
         <CollegesTable 
           data={colleges}
-          category="polytechnic"
+          filter="POLYTECHNIC"
+          onFilterChange={() => {}}
           onDelete={deleteCollege}
           onToggleStatus={toggleStatus}
           onToggleCourse={toggleCourse}
           onEdit={handleEdit}
-          onRefresh={() => {}}
+          onRefresh={refresh}
         />
       )}
 

@@ -5,22 +5,48 @@ export interface CollegeCourse {
   isEnabled: boolean;
 }
 
+export type CollegeType = 'ENGINEERING' | 'POLYTECHNIC';
+export type CollegeStatus = 'ACTIVE' | 'INACTIVE' | 'PENDING';
+
 export interface College {
   id: number;
+  type: CollegeType;
   name: string;
   code: string;
-  totalSeats: number;
   address: string;
+  city?: string;
   district: string;
   state: string;
-  contacts: string[]; // Multiple numbers
+  pincode?: string;
   email: string;
   website: string;
-  feesInfo: string;
+  telephone?: string;
+  contacts: string[]; // Keep for UI helper
+  fees?: string;
+  feesInfo?: string; // Keep for UI helper
   brochureUrl?: string;
+  brochureFileName?: string;
+  
+  // Branch Intake Fields (Backend)
+  intakeCE?: string;
+  intakeME?: string;
+  intakeEE?: string;
+  intakeEEE?: string;
+  intakeECE?: string;
+  intakeCSE?: string;
+  intakeIT?: string;
+  intakeAI?: string;
+  intakeOther?: string;
+  totalIntake?: number;
+  
+  // UI Helpers
   courseMatrix: Record<string, { isEnabled: boolean; seats: number }>;
-  category: 'engineering' | 'polytechnic';
+  category: 'engineering' | 'polytechnic'; // Keep for compatibility
   isActive: boolean;
+  status: CollegeStatus;
+  
+  displayOrder?: number;
+  isFeatured?: boolean;
 }
 
 export interface CollegesTableProps {
@@ -32,3 +58,4 @@ export interface CollegesTableProps {
   onEdit?: (college: College) => void;
   onRefresh?: () => void;
 }
+

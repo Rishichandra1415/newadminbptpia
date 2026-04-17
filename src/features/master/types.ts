@@ -15,12 +15,16 @@ export interface CityEntry {
 export interface CourseEntry {
   id: number;
   name: string;
+  courseType?: string;
   isActive: boolean;
 }
 
 export interface BranchEntry {
   id: number;
   name: string;
+  courseId?: number;
+  courseType?: string;
+  course?: CourseEntry;
   isActive: boolean;
 }
 
@@ -78,6 +82,7 @@ export interface BranchModalProps {
   onClose: () => void;
   onSave: (formData: any) => Promise<boolean>;
   editData?: BranchEntry | null;
+  courses?: CourseEntry[]; // Added for Course dropdown
 }
 
 export interface ExamCenterTableProps {

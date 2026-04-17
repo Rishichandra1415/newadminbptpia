@@ -28,4 +28,38 @@ export const masterService = {
   deleteCity: async (id: number) => {
     return http.delete<{ success: boolean }>(`${API_ENDPOINTS.MASTER.CITIES}/${id}`);
   },
+
+  // --- Courses ---
+  getCourses: async () => {
+    return apiClient<{ success: boolean; data: any[] }>(API_ENDPOINTS.MASTER.COURSES);
+  },
+
+  createCourse: async (data: { courseName: string; courseType: string }) => {
+    return http.post<{ success: boolean; data: any }>(API_ENDPOINTS.MASTER.COURSES, data);
+  },
+
+  updateCourse: async (id: number, data: { courseName?: string; courseType?: string; status?: string }) => {
+    return http.put<{ success: boolean; data: any }>(`${API_ENDPOINTS.MASTER.COURSES}/${id}`, data);
+  },
+
+  deleteCourse: async (id: number) => {
+    return http.delete<{ success: boolean }>(`${API_ENDPOINTS.MASTER.COURSES}/${id}`);
+  },
+
+  // --- Branches ---
+  getBranches: async () => {
+    return apiClient<{ success: boolean; data: any[] }>(API_ENDPOINTS.MASTER.BRANCHES);
+  },
+
+  createBranch: async (data: { branchName: string; courseId: number; courseType: string }) => {
+    return http.post<{ success: boolean; data: any }>(API_ENDPOINTS.MASTER.BRANCHES, data);
+  },
+
+  updateBranch: async (id: number, data: { branchName?: string; courseId?: number; courseType?: string; status?: string }) => {
+    return http.put<{ success: boolean; data: any }>(`${API_ENDPOINTS.MASTER.BRANCHES}/${id}`, data);
+  },
+
+  deleteBranch: async (id: number) => {
+    return http.delete<{ success: boolean }>(`${API_ENDPOINTS.MASTER.BRANCHES}/${id}`);
+  },
 };

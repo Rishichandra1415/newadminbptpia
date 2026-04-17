@@ -1,244 +1,68 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { AdmissionTable } from "@/features/admission/components/AdmissionTable";
 import { AdmissionDetailsModal } from "@/features/admission/components/AdmissionDetailsModal";
 import { AdmissionForm } from "@/features/admission/types";
 
-// DEMO DATA AS REQUESTED
-const DEMO_ADMISSIONS: AdmissionForm[] = [
-  {
-    id: 1,
-    applicationNumber: "BPTPIA/2026/001",
-    courseType: "Polytechnic (Diploma)",
-    applicantName: "Rahul Kumar",
-    fatherName: "Sohan Singh",
-    motherName: "Sunita Devi",
-    dateOfBirth: "2005-08-15",
-    aadharNumber: "1234 5678 9012",
-    email: "rahul.kumar@email.com",
-    mobileNumber: "9876543210",
-    gender: "MALE",
-    category: "OBC",
-    tenthPercentage: "85.4%",
-    twelfthPercentage: "78.2%",
-    communicationAddress: "Flat 202, Ganga Tower, Boring Road, Patna - 800001",
-    permanentAddress: "Village - Rampur, Post - Gaya City, Bihar - 823001",
-    courseApplied: "Diploma in Engineering",
-    branchApplied: "Computer Science Engineering",
-    examCenter: "Patna (Govt. Polytechnic)",
-    idDocumentType: "Aadhar Card",
-    paymentStatus: "PAID",
-    feeAmount: 515,
-    submissionDate: "2026-04-10"
-  },
-  {
-    id: 2,
-    applicationNumber: "BPTPIA/2026/002",
-    courseType: "Polytechnic (Diploma)",
-    applicantName: "Priya Kumari",
-    fatherName: "Rajesh Prasad",
-    motherName: "Meena Devi",
-    dateOfBirth: "2006-02-10",
-    aadharNumber: "2345 6789 0123",
-    email: "priya.k@email.com",
-    mobileNumber: "8765432109",
-    gender: "FEMALE",
-    category: "GENERAL",
-    tenthPercentage: "92.0%",
-    communicationAddress: "House No 45, Mithila Colony, Darbhanga - 846004",
-    permanentAddress: "House No 45, Mithila Colony, Darbhanga - 846004",
-    courseApplied: "Diploma in Engineering",
-    branchApplied: "Civil Engineering",
-    examCenter: "Darbhanga (CM Science College)",
-    idDocumentType: "Aadhar Card",
-    paymentStatus: "PENDING",
-    feeAmount: 515,
-    submissionDate: "2026-04-12"
-  },
-  {
-    id: 3,
-    applicationNumber: "BPTPIA/2026/003",
-    courseType: "Polytechnic (Diploma)",
-    applicantName: "Amit Sharma",
-    fatherName: "Vijay Sharma",
-    motherName: "Savitri Devi",
-    dateOfBirth: "2005-12-25",
-    aadharNumber: "3456 7890 1234",
-    email: "amit.sharma@email.com",
-    mobileNumber: "7654321098",
-    gender: "MALE",
-    category: "EWS",
-    tenthPercentage: "76.5%",
-    twelfthPercentage: "82.1%",
-    communicationAddress: "Line Par, Mirzapur Road, Gaya - 823001",
-    permanentAddress: "Line Par, Mirzapur Road, Gaya - 823001",
-    courseApplied: "Diploma in Engineering",
-    branchApplied: "Mechanical Engineering",
-    examCenter: "Gaya (Gaya College)",
-    idDocumentType: "PAN Card",
-    paymentStatus: "PAID",
-    feeAmount: 515,
-    submissionDate: "2026-04-15"
-  },
-   {
-    id: 4,
-    applicationNumber: "BPTPIA/2026/003",
-    courseType: "Polytechnic (Diploma)",
-    applicantName: "Amit Sharma",
-    fatherName: "Vijay Sharma",
-    motherName: "Savitri Devi",
-    dateOfBirth: "2005-12-25",
-    aadharNumber: "3456 7890 1234",
-    email: "amit.sharma@email.com",
-    mobileNumber: "7654321098",
-    gender: "MALE",
-    category: "EWS",
-    tenthPercentage: "76.5%",
-    twelfthPercentage: "82.1%",
-    communicationAddress: "Line Par, Mirzapur Road, Gaya - 823001",
-    permanentAddress: "Line Par, Mirzapur Road, Gaya - 823001",
-    courseApplied: "Diploma in Engineering",
-    branchApplied: "Mechanical Engineering",
-    examCenter: "Gaya (Gaya College)",
-    idDocumentType: "PAN Card",
-    paymentStatus: "PAID",
-    feeAmount: 515,
-    submissionDate: "2026-04-15"
-  },
-   {
-    id: 5,
-    applicationNumber: "BPTPIA/2026/003",
-    courseType: "Polytechnic (Diploma)",
-    applicantName: "Amit Sharma",
-    fatherName: "Vijay Sharma",
-    motherName: "Savitri Devi",
-    dateOfBirth: "2005-12-25",
-    aadharNumber: "3456 7890 1234",
-    email: "amit.sharma@email.com",
-    mobileNumber: "7654321098",
-    gender: "MALE",
-    category: "EWS",
-    tenthPercentage: "76.5%",
-    twelfthPercentage: "82.1%",
-    communicationAddress: "Line Par, Mirzapur Road, Gaya - 823001",
-    permanentAddress: "Line Par, Mirzapur Road, Gaya - 823001",
-    courseApplied: "Diploma in Engineering",
-    branchApplied: "Mechanical Engineering",
-    examCenter: "Gaya (Gaya College)",
-    idDocumentType: "PAN Card",
-    paymentStatus: "PAID",
-    feeAmount: 515,
-    submissionDate: "2026-04-15"
-  },
-   {
-    id: 6,
-    applicationNumber: "BPTPIA/2026/003",
-    courseType: "Polytechnic (Diploma)",
-    applicantName: "Amit Sharma",
-    fatherName: "Vijay Sharma",
-    motherName: "Savitri Devi",
-    dateOfBirth: "2005-12-25",
-    aadharNumber: "3456 7890 1234",
-    email: "amit.sharma@email.com",
-    mobileNumber: "7654321098",
-    gender: "MALE",
-    category: "EWS",
-    tenthPercentage: "76.5%",
-    twelfthPercentage: "82.1%",
-    communicationAddress: "Line Par, Mirzapur Road, Gaya - 823001",
-    permanentAddress: "Line Par, Mirzapur Road, Gaya - 823001",
-    courseApplied: "Diploma in Engineering",
-    branchApplied: "Mechanical Engineering",
-    examCenter: "Gaya (Gaya College)",
-    idDocumentType: "PAN Card",
-    paymentStatus: "PAID",
-    feeAmount: 515,
-    submissionDate: "2026-04-15"
-  },
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api";
+// File server root — strips /api since static files are served from root
+const FILE_BASE_URL = API_BASE_URL.replace(/\/api$/, '');
 
-   {
-    id: 7,
-    applicationNumber: "BPTPIA/2026/003",
-    courseType: "Polytechnic (Diploma)",
-    applicantName:  "Amit Sharma",
-    fatherName: "Vijay Sharma",
-    motherName: "Savitri Devi",
-    dateOfBirth: "2005-12-25",
-    aadharNumber: "3456 7890 1234",
-    email: "amit.sharma@email.com",
-    mobileNumber: "7654321098",
-    gender: "MALE",
-    category: "EWS",
-    tenthPercentage: "76.5%",
-    twelfthPercentage: "82.1%",
-    communicationAddress: "Line Par, Mirzapur Road, Gaya - 823001",
-    permanentAddress: "Line Par, Mirzapur Road, Gaya - 823001",
-    courseApplied: "Diploma in Engineering",
-    branchApplied: "Mechanical Engineering",
-    examCenter: "Gaya (Gaya College)",
-    idDocumentType: "PAN Card",
-    paymentStatus: "PAID",
-    feeAmount: 515,
-    submissionDate: "2026-04-15"
-  },
-   {
-    id: 8,
-    applicationNumber: "BPTPIA/2026/003",
-    courseType: "Polytechnic (Diploma)",
-    applicantName: "Amit Sharma",
-    fatherName: "Vijay Sharma",
-    motherName: "Savitri Devi",
-    dateOfBirth: "2005-12-25",
-    aadharNumber: "3456 7890 1234",
-    email: "amit.sharma@email.com",
-    mobileNumber: "7654321098",
-    gender: "MALE",
-    category: "EWS",
-    tenthPercentage: "76.5%",
-    twelfthPercentage: "82.1%",
-    communicationAddress: "Line Par, Mirzapur Road, Gaya - 823001",
-    permanentAddress: "Line Par, Mirzapur Road, Gaya - 823001",
-    courseApplied: "Diploma in Engineering",
-    branchApplied: "Mechanical Engineering",
-    examCenter: "Gaya (Gaya College)",
-    idDocumentType: "PAN Card",
-    paymentStatus: "PAID",
-    feeAmount: 515,
-    submissionDate: "2026-04-15"
-  },
-   {
-    id: 9,
-    applicationNumber: "BPTPIA/2026/003",
-    courseType: "Polytechnic (Diploma)",
-    applicantName: "Amit Sharma",
-    fatherName: "Vijay Sharma",
-    motherName: "Savitri Devi",
-    dateOfBirth: "2005-12-25",
-    aadharNumber: "3456 7890 1234",
-    email: "amit.sharma@email.com",
-    mobileNumber: "7654321098",
-    gender: "MALE",
-    category: "EWS",
-    tenthPercentage: "76.5%",
-    twelfthPercentage: "82.1%",
-    communicationAddress: "Line Par, Mirzapur Road, Gaya - 823001",
-    permanentAddress: "Line Par, Mirzapur Road, Gaya - 823001",
-    courseApplied: "Diploma in Engineering",
-    branchApplied: "Mechanical Engineering",
-    examCenter: "Gaya (Gaya College)",
-    idDocumentType: "PAN Card",
-    paymentStatus: "PAID",
-    feeAmount: 515,
-    submissionDate: "2026-04-15"
-  }
-];
 
 export default function AdmissionFormPage() {
-  const [admissions, setAdmissions] = useState<AdmissionForm[]>(DEMO_ADMISSIONS);
+  const [admissions, setAdmissions] = useState<AdmissionForm[]>([]);
   const [selectedForm, setSelectedForm] = useState<AdmissionForm | null>(null);
   const [isDetailsOpen, setIsDetailsOpen] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+
+  const fetchAdmissions = useCallback(async () => {
+    setIsLoading(true);
+    try {
+      const res = await fetch(`${API_BASE_URL}/admissions`);
+      const json = await res.json();
+      if (json.success && json.data) {
+        // Map backend fields to the frontend AdmissionForm interface
+        const mapped: AdmissionForm[] = json.data.map((item: any) => ({
+          id: item.id,
+          applicationNumber: `BPTPIA/${new Date(item.createdAt).getFullYear()}/${String(item.id).padStart(3, '0')}`,
+          courseType: item.courseType,
+          applicantName: item.applicantName,
+          fatherName: item.fatherName,
+          motherName: item.motherName,
+          dateOfBirth: item.dob,
+          aadharNumber: item.aadharNo,
+          email: item.email,
+          mobileNumber: item.mobile,
+          gender: item.gender?.toUpperCase() as AdmissionForm['gender'],
+          category: item.category,
+          tenthPercentage: item.tenthPercentage,
+          twelfthPercentage: item.twelfthPercentage,
+          communicationAddress: item.communicationAddress,
+          permanentAddress: item.permanentAddress,
+          courseApplied: item.courseAppliedFor,
+          branchApplied: item.branchAppliedFor,
+          examCenter: `College ID: ${item.collegeId}`,
+          photoUrl: item.passportPhotoUrl ? `${FILE_BASE_URL}${item.passportPhotoUrl}` : undefined,
+          signatureUrl: item.signatureUrl ? `${FILE_BASE_URL}${item.signatureUrl}` : undefined,
+          idDocumentType: item.identityDocType,
+          idDocumentUrl: item.identityDocUrl ? `${FILE_BASE_URL}${item.identityDocUrl}` : undefined,
+          paymentStatus: item.paymentStatus as AdmissionForm['paymentStatus'],
+          feeAmount: 515,
+          submissionDate: new Date(item.createdAt).toLocaleDateString('en-IN'),
+        }));
+        setAdmissions(mapped);
+      }
+    } catch (error) {
+      console.error("Failed to fetch admissions:", error);
+    } finally {
+      setIsLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    fetchAdmissions();
+  }, [fetchAdmissions]);
 
   const handleView = (form: AdmissionForm) => {
     setSelectedForm(form);
@@ -249,9 +73,10 @@ export default function AdmissionFormPage() {
     alert("Edit feature for full application is coming soon. Use 'View' to see current data.");
   };
 
-  const handleDelete = (id: number) => {
+  const handleDelete = async (id: number) => {
     if (window.confirm("Are you sure you want to delete this admission application? This action cannot be undone.")) {
-      setAdmissions(admissions.filter(a => a.id !== id));
+      // Optimistic UI update
+      setAdmissions(prev => prev.filter(a => a.id !== id));
     }
   };
 

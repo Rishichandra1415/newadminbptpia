@@ -11,10 +11,13 @@ export function BranchModal({
   isOpen,
   onClose,
   onSave,
-  editData
+  editData,
+  courses = []
 }: BranchModalProps) {
   const [formData, setFormData] = useState({
     name: "",
+    courseId: "",
+    courseType: "ENGINEERING",
     isActive: true
   });
   const [isSaving, setIsSaving] = useState(false);
@@ -23,11 +26,15 @@ export function BranchModal({
     if (editData) {
       setFormData({
         name: editData.name,
+        courseId: editData.courseId?.toString() || "",
+        courseType: editData.courseType || "ENGINEERING",
         isActive: editData.isActive
       });
     } else {
       setFormData({
         name: "",
+        courseId: "",
+        courseType: "ENGINEERING",
         isActive: true
       });
     }
@@ -74,6 +81,44 @@ export function BranchModal({
                         <h3 className="text-[#00b4d8] text-[12px] md:text-[13px] font-bold tracking-widest uppercase border-b border-slate-100 pb-2 flex items-center gap-2">
                             <BadgeCheck size={16} /> Branch details
                         </h3>
+
+                        <div className="space-y-1.5">
+                            <label className="text-[12px] md:text-[13px] font-medium text-slate-500 flex items-center gap-1.5">
+                                Belongs to Category <span className="text-red-500">*</span>
+                            </label>
+                            <select 
+                                name="courseType" 
+                                required 
+                                className="w-full p-2.5 rounded-lg text-sm text-slate-700 outline-none transition-all border border-slate-200 bg-white focus:border-[#00b4d8] shadow-sm" 
+                                value={formData.courseType} 
+                                onChange={(e) => setFormData({...formData, courseType: e.target.value, courseId: ""})} 
+                            >
+                                <option value="ENGINEERING">ENGINEERING (B.Tech, etc.)</option>
+                                <option value="POLYTECHNIC">POLYTECHNIC (Diploma)</option>
+                            </select>
+                        </div>
+
+                        <div className="space-y-1.5">
+                            <label className="text-[12px] md:text-[13px] font-medium text-slate-500 flex items-center gap-1.5">
+                                Belongs to Course <span className="text-red-500">*</span>
+                            </label>
+                            <select 
+                                name="courseId" 
+                                required 
+                                className="w-full p-2.5 rounded-lg text-sm text-slate-700 outline-none transition-all border border-slate-200 bg-white focus:border-[#00b4d8] shadow-sm" 
+                                value={formData.courseId} 
+                                onChange={(e) => setFormData({...formData, courseId: e.target.value})} 
+                            >
+                                <option value="" disabled>-- Select Course --</option>
+                                {courses
+                                  .filter(course => course.courseType === formData.courseType)
+                                  .map(course => (
+                                    <option key={course.id} value={course.id}>
+                                        {course.name}
+                                    </option>
+                                ))}
+                            </select>
+                        </div>
 
                         <div className="space-y-1.5">
                             <label className="text-[12px] md:text-[13px] font-medium text-slate-500 flex items-center gap-1.5">

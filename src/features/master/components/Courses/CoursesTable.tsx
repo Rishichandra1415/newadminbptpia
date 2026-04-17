@@ -95,7 +95,7 @@ export function CoursesTable({
               <tr className="border-b border-slate-200 text-[11px] md:text-[12px] text-[#00b4d8] tracking-widest uppercase font-bold shadow-sm">
                 <th className="p-3 md:p-4 w-[60px] text-center bg-slate-50">#</th> 
                 <th className="p-3 md:p-4 bg-slate-50 text-left">Course Entry Summary</th>
-                <th className="p-3 md:p-4 w-[120px] text-center bg-slate-50">Code</th>
+                <th className="p-3 md:p-4 w-[150px] text-left bg-slate-50">Category</th>
                 <th className="p-3 md:p-4 w-[180px] text-center bg-slate-50">Status</th>
                 <th className="p-3 md:p-4 w-[120px] text-right pr-8 bg-slate-50">Actions</th>
               </tr>
@@ -132,9 +132,13 @@ export function CoursesTable({
                     </div>
                   </td>
 
-                  <td className="p-3 md:p-4 text-center">
-                    <span className="text-[13px] font-bold text-slate-700 bg-slate-50 px-2.5 py-1 rounded border border-slate-100 uppercase tracking-tighter">
-                         C-{course.id.toString().padStart(3, '0')}
+                  <td className="p-3 md:p-4 text-left">
+                    <span className={`text-[10px] px-2.5 py-1 rounded-md font-bold uppercase tracking-wider border shadow-sm ${
+                        course.courseType === 'ENGINEERING' 
+                        ? 'bg-indigo-50 text-indigo-600 border-indigo-100' 
+                        : 'bg-orange-50 text-orange-600 border-orange-100'
+                    }`}>
+                        {course.courseType || 'NOT SPECIFIED'}
                     </span>
                   </td>
 

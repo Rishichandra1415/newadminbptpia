@@ -5,6 +5,8 @@ export const API_ENDPOINTS = {
   MASTER: {
     STATES: "/locations/states",
     CITIES: "/locations/districts",
+    COURSES: "/masters/courses",
+    BRANCHES: "/masters/branches",
   },
   // Add other modules here as the app grows
   COLLEGES: "/colleges",

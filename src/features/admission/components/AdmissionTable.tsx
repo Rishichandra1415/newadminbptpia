@@ -154,24 +154,20 @@ export function AdmissionTable({
                     </div>
                   </td>
 
-                  {/* Payment Status Pill Toggle */}
+                  {/* Payment Status Badge */}
                   <td className="p-3 md:p-4 text-center">
-                    <div className="flex items-center justify-center gap-2 group/toggle">
-                       <span className={`text-[10px] font-bold px-2 py-0.5 rounded transition-colors ${
-                           form.paymentStatus === 'PAID' 
-                           ? 'bg-green-50 text-green-500' 
-                           : form.paymentStatus === 'FAILED' ? 'bg-red-50 text-red-500' : 'bg-amber-50 text-amber-500'
-                       }`}>
-                          {form.paymentStatus}
-                       </span>
-                       <div className={`w-8 h-4.5 rounded-full relative transition-all duration-300 shadow-inner ${
-                             form.paymentStatus === 'PAID' ? 'bg-green-500' : 'bg-amber-400'
-                          }`}>
-                           <div className={`absolute top-0.5 w-3.5 h-3.5 rounded-full bg-white shadow-md transition-all duration-300 ${
-                             form.paymentStatus === 'PAID' ? 'left-[16px]' : 'left-0.5'
-                          }`} />
-                       </div>
-                    </div>
+                     <span className={`inline-flex items-center gap-1.5 text-[11px] font-bold px-3 py-1.5 rounded-full ${
+                         form.paymentStatus === 'PAID' 
+                         ? 'bg-green-50 text-green-600 border border-green-200' 
+                         : form.paymentStatus === 'FAILED' 
+                         ? 'bg-red-50 text-red-500 border border-red-200' 
+                         : 'bg-amber-50 text-amber-600 border border-amber-200'
+                     }`}>
+                        <span className={`w-1.5 h-1.5 rounded-full inline-block ${
+                            form.paymentStatus === 'PAID' ? 'bg-green-500' : form.paymentStatus === 'FAILED' ? 'bg-red-500' : 'bg-amber-500'
+                        }`} />
+                        {form.paymentStatus}
+                     </span>
                   </td>
 
                   {/* Submission Date */}

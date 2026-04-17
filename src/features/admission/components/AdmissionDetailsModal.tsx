@@ -147,25 +147,29 @@ export function AdmissionDetailsModal({
                     <div className="lg:col-span-3">
                          <SectionHeader icon={FileText} title="Identification & Verification" color="text-indigo-500" />
                          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                            {[
+                             {[
                                 { name: "Passport Photo", url: data.photoUrl, icon: User },
                                 { name: "Signature", url: data.signatureUrl, icon: Edit3 },
                                 { name: "ID Document", url: data.idDocumentUrl, icon: Hash }
                             ].map((doc, idx) => (
-                                <div key={idx} className="flex items-center justify-between p-4 bg-white border border-slate-200 rounded-xl hover:border-[#00b4d8] transition-all group shadow-sm">
+                                <a
+                                    key={idx}
+                                    href={doc.url || '#'}
+                                    target={doc.url ? "_blank" : "_self"}
+                                    rel="noreferrer"
+                                    onClick={!doc.url ? (e) => e.preventDefault() : undefined}
+                                    className={`flex items-center justify-between p-4 bg-white border rounded-xl transition-all group shadow-sm ${doc.url ? 'border-slate-200 hover:border-[#00b4d8] hover:shadow-md cursor-pointer' : 'border-slate-100 opacity-50 cursor-not-allowed'}`}
+                                >
                                     <div className="flex items-center gap-3">
-                                        <div className="p-2 bg-slate-50 rounded-lg text-slate-400 group-hover:text-[#00b4d8] group-hover:bg-blue-50 transition-colors">
+                                        <div className={`p-2 rounded-lg transition-colors ${doc.url ? 'bg-slate-50 text-slate-400 group-hover:text-[#00b4d8] group-hover:bg-blue-50' : 'bg-slate-50 text-slate-300'}`}>
                                             <doc.icon size={18} />
                                         </div>
                                         <span className="text-[13px] font-bold text-slate-700">{doc.name}</span>
                                     </div>
-                                    <a 
-                                        href={doc.url} target="_blank" rel="noreferrer"
-                                        className="p-2 text-slate-300 hover:text-[#00b4d8] transition-colors"
-                                    >
+                                    <div className={`p-2 transition-colors ${doc.url ? 'text-slate-300 group-hover:text-[#00b4d8]' : 'text-slate-200'}`}>
                                         <Eye size={18} />
-                                    </a>
-                                </div>
+                                    </div>
+                                </a>
                             ))}
                          </div>
                     </div>

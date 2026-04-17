@@ -1,28 +1,41 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { CoursesTable } from "@/features/master/components/Courses/CoursesTable";
 import { CourseModal } from "@/features/master/components/Courses/CourseModal";
 import { CourseEntry } from "@/features/master/types";
-
-// DEMO DATA AS REQUESTED
-const DEMO_COURSES: CourseEntry[] = [
-  { id: 1, name: "B.Tech Computer Science Engineering", isActive: true },
-  { id: 2, name: "B.Tech Mechanical Engineering", isActive: true },
-  { id: 3, name: "B.Tech Civil Engineering", isActive: true },
-  { id: 4, name: "B.Tech Electrical & Electronics Engineering", isActive: true },
-  { id: 5, name: "Polytechnic Civil Engineering", isActive: true },
-  { id: 6, name: "Polytechnic Mechanical Engineering", isActive: true },
-  { id: 7, name: "Polytechnic Computer Science", isActive: true },
-  { id: 8, name: "B.Tech Artificial Intelligence & Machine Learning", isActive: false },
-  { id: 9, name: "Polytechnic Electrical Engineering", isActive: true },
-];
+import { masterService } from "@/features/master/services/masterService";
 
 export default function CoursesPage() {
-  const [courses, setCourses] = useState<CourseEntry[]>(DEMO_COURSES);
+  const [courses, setCourses] = useState<CourseEntry[]>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingCourse, setEditingCourse] = useState<CourseEntry | null>(null);
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+
+  const fetchCourses = async () => {
+    setIsLoading(true);
+    try {
+      const response = await masterService.getCourses();
+      if (response.success) {
+        // Map backend 'courseName' to frontend 'name' if necessary
+        const mappedData = response.data.map((item: any) => ({
+          id: item.id,
+          name: item.courseName,
+          courseType: item.courseType,
+          isActive: item.status === 'ACTIVE'
+        }));
+        setCourses(mappedData);
+      }
+    } catch (error) {
+      console.error("Failed to fetch courses:", error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchCourses();
+  }, []);
 
   const handleAdd = () => {
     setEditingCourse(null);
@@ -34,39 +47,67 @@ export default function CoursesPage() {
     setIsModalOpen(true);
   };
 
-  const handleDelete = (id: number) => {
+  const handleDelete = async (id: number) => {
     if (window.confirm("Are you sure you want to delete this course?")) {
-      setCourses(courses.filter(c => c.id !== id));
+      try {
+        const response = await masterService.deleteCourse(id);
+        if (response.success) {
+          setCourses(courses.filter(c => c.id !== id));
+        }
+      } catch (error) {
+        alert("Cannot delete course. It might be linked to existing branches.");
+      }
     }
   };
 
-  const handleToggleStatus = (id: number) => {
-    setCourses(courses.map(c => 
-      c.id === id ? { ...c, isActive: !c.isActive } : c
-    ));
+  const handleToggleStatus = async (id: number) => {
+    const course = courses.find(c => c.id === id);
+    if (!course) return;
+
+    try {
+      const newStatus = course.isActive ? 'INACTIVE' : 'ACTIVE';
+      const response = await masterService.updateCourse(id, { status: newStatus });
+      if (response.success) {
+        setCourses(courses.map(c => 
+          c.id === id ? { ...c, isActive: !c.isActive } : c
+        ));
+      }
+    } catch (error) {
+      console.error("Toggle status failed:", error);
+    }
   };
 
-  const handleSave = async (formData: { name: string; isActive: boolean }) => {
+  const handleSave = async (formData: { name: string; courseType: string; isActive: boolean }) => {
     setIsLoading(true);
-    // Simulate API delay
-    await new Promise(resolve => setTimeout(resolve, 600));
-
-    if (editingCourse) {
-      // Update
-      setCourses(courses.map(c => 
-        c.id === editingCourse.id ? { ...c, ...formData } : c
-      ));
-    } else {
-      // Create
-      const newCourse: CourseEntry = {
-        id: Math.max(0, ...courses.map(c => c.id)) + 1,
-        ...formData
-      };
-      setCourses([newCourse, ...courses]);
+    try {
+      if (editingCourse) {
+        // Update
+        const response = await masterService.updateCourse(editingCourse.id, {
+          courseName: formData.name,
+          courseType: formData.courseType,
+          status: formData.isActive ? 'ACTIVE' : 'INACTIVE'
+        });
+        if (response.success) {
+          fetchCourses(); // Refresh list
+          return true;
+        }
+      } else {
+        // Create
+        const response = await masterService.createCourse({
+          courseName: formData.name,
+          courseType: formData.courseType
+        });
+        if (response.success) {
+          fetchCourses();
+          return true;
+        }
+      }
+    } catch (error) {
+      console.error("Save failed:", error);
+    } finally {
+      setIsLoading(false);
     }
-    
-    setIsLoading(false);
-    return true;
+    return false;
   };
 
   return (

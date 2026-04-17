@@ -39,14 +39,19 @@ export interface College {
   intakeOther?: string;
   totalIntake?: number;
   
+  // SEO & Meta
+  metaTitle?: string;
+  metaDescription?: string;
+  
+  // Organization
+  displayOrder?: number;
+  isFeatured?: boolean;
+
   // UI Helpers
   courseMatrix: Record<string, { isEnabled: boolean; seats: number }>;
   category: 'engineering' | 'polytechnic'; // Keep for compatibility
   isActive: boolean;
   status: CollegeStatus;
-  
-  displayOrder?: number;
-  isFeatured?: boolean;
 }
 
 export interface CollegesTableProps {

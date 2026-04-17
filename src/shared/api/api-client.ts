@@ -52,13 +52,25 @@ export const http = {
     apiClient<T>(url, { ...options, method: "GET" }),
   
   post: <T>(url: string, body: any, options?: RequestInit) => 
-    apiClient<T>(url, { ...options, method: "POST", body: JSON.stringify(body) }),
+    apiClient<T>(url, { 
+      ...options, 
+      method: "POST", 
+      body: body instanceof FormData ? body : JSON.stringify(body) 
+    }),
   
   put: <T>(url: string, body: any, options?: RequestInit) => 
-    apiClient<T>(url, { ...options, method: "PUT", body: JSON.stringify(body) }),
+    apiClient<T>(url, { 
+      ...options, 
+      method: "PUT", 
+      body: body instanceof FormData ? body : JSON.stringify(body) 
+    }),
   
   patch: <T>(url: string, body: any, options?: RequestInit) => 
-    apiClient<T>(url, { ...options, method: "PATCH", body: JSON.stringify(body) }),
+    apiClient<T>(url, { 
+      ...options, 
+      method: "PATCH", 
+      body: body instanceof FormData ? body : JSON.stringify(body) 
+    }),
   
   delete: <T>(url: string, options?: RequestInit) => 
     apiClient<T>(url, { ...options, method: "DELETE" }),

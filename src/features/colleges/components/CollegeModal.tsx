@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { X, Save, School, MapPin, Globe, Mail, Phone, GraduationCap, DollarSign, FileText, FileBadge } from "lucide-react";
+import { X, Save, School, MapPin, Globe, Mail, Phone, GraduationCap, DollarSign, FileText, FileBadge, Plus, ShieldCheck, Settings } from "lucide-react";
 import { College, CollegeType } from "../types";
 import { capitalizeWords } from "@/shared/utils/string-utils";
 import { http } from "@/shared/api/api-client";
@@ -240,7 +240,7 @@ export function CollegeModal({ isOpen, onClose, onSave, category, editData }: Co
                 <h3 className="text-amber-500 text-[11px] font-bold tracking-widest uppercase flex items-center gap-2 border-b pb-2">
                   <MapPin size={14} /> Connectivity & Location
                 </h3>
-                <div className="grid grid-cols-3 gap-4">
+                <div className="grid grid-cols-2 gap-4">
                     <div className="space-y-1">
                         <label className="text-[11px] font-bold text-slate-500 uppercase tracking-tight">State</label>
                         <select 
@@ -268,12 +268,22 @@ export function CollegeModal({ isOpen, onClose, onSave, category, editData }: Co
                             ))}
                         </select>
                     </div>
+                </div>
+                <div className="grid grid-cols-2 gap-4">
                     <div className="space-y-1">
                         <label className="text-[11px] font-bold text-slate-500 uppercase tracking-tight">City</label>
                         <input 
                             type="text" placeholder="Patna" 
                             className="w-full p-2.5 rounded-lg text-sm border border-slate-200 focus:border-[#00b4d8] outline-none" 
                             value={formData.city || ""} onChange={(e) => setFormData({...formData, city: e.target.value})} 
+                        />
+                    </div>
+                    <div className="space-y-1">
+                        <label className="text-[11px] font-bold text-slate-500 uppercase tracking-tight">Pincode</label>
+                        <input 
+                            type="text" placeholder="800001" 
+                            className="w-full p-2.5 rounded-lg text-sm border border-slate-200 focus:border-[#00b4d8] outline-none" 
+                            value={formData.pincode || ""} onChange={(e) => setFormData({...formData, pincode: e.target.value})} 
                         />
                     </div>
                 </div>
@@ -310,6 +320,38 @@ export function CollegeModal({ isOpen, onClose, onSave, category, editData }: Co
                   />
                 </div>
               </section>
+
+              {/* Advanced Settings */}
+              {/* <section className="space-y-4">
+                <h3 className="text-slate-500 text-[11px] font-bold tracking-widest uppercase flex items-center gap-2 border-b pb-2">
+                   <Settings size={14} /> Display & Advanced Settings
+                </h3>
+                <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-1">
+                        <label className="text-[11px] font-bold text-slate-500 uppercase tracking-tight">Display Order</label>
+                        <input 
+                            type="number" 
+                            className="w-full p-2.5 rounded-lg text-sm border border-slate-200 focus:border-[#00b4d8] outline-none" 
+                            value={formData.displayOrder || 0} onChange={(e) => setFormData({...formData, displayOrder: parseInt(e.target.value)})} 
+                        />
+                    </div>
+                    <div className="flex items-end pb-1.5">
+                        <label className="flex items-center gap-2 cursor-pointer group">
+                             <div className="relative">
+                                <input 
+                                    type="checkbox" 
+                                    className="sr-only peer" 
+                                    checked={formData.isFeatured || false} 
+                                    onChange={(e) => setFormData({...formData, isFeatured: e.target.checked})}
+                                />
+                                <div className="w-9 h-5 bg-slate-200 rounded-full peer peer-checked:bg-amber-400 transition-colors"></div>
+                                <div className="absolute left-1 top-1 w-3 h-3 bg-white rounded-full transition-transform peer-checked:translate-x-4"></div>
+                             </div>
+                             <span className="text-[11px] font-bold text-slate-500 uppercase group-hover:text-amber-500 transition-colors">Mark as Featured</span>
+                        </label>
+                    </div>
+                </div>
+              </section> */}
             </div>
 
             {/* Courses & Fees */}
@@ -359,6 +401,11 @@ export function CollegeModal({ isOpen, onClose, onSave, category, editData }: Co
                                 Object.values(matrix).forEach((v: any) => {
                                     if (v.isEnabled) newTotal += (v.seats || 0);
                                 });
+                                // Add intakeOther value too
+                                if (formData.intakeOther && formData.intakeOther !== "-") {
+                                    const otherSeats = parseInt(formData.intakeOther) || 0;
+                                    newTotal += otherSeats;
+                                }
                                 setFormData(prev => ({ ...prev, courseMatrix: matrix, totalIntake: newTotal }));
                             }}
                           />
@@ -366,6 +413,14 @@ export function CollegeModal({ isOpen, onClose, onSave, category, editData }: Co
                       </div>
                     );
                   })}
+                </div>
+                <div className="space-y-1 pt-2">
+                    <label className="text-[11px] font-bold text-slate-500 uppercase tracking-tight">Other Intake (Branches with count)</label>
+                    <input 
+                        type="text" placeholder="e.g. ME-60, CE-30" 
+                        className="w-full p-2.5 rounded-lg text-sm border border-slate-200 focus:border-[#00b4d8] outline-none" 
+                        value={formData.intakeOther || ""} onChange={(e) => setFormData({...formData, intakeOther: e.target.value})} 
+                    />
                 </div>
               </section>
 
@@ -382,17 +437,95 @@ export function CollegeModal({ isOpen, onClose, onSave, category, editData }: Co
                   />
                 </div>
                 <div className="space-y-1">
-                  <label className="text-[11px] font-bold text-slate-500 uppercase tracking-tight">Brochure Link</label>
-                  <div className="relative">
-                    <FileBadge size={14} className="absolute left-3 top-3 text-slate-400" />
-                    <input 
-                      type="text" placeholder="https://..." 
-                      className="w-full pl-9 p-2.5 rounded-lg text-sm border border-slate-200 focus:border-[#00b4d8] outline-none" 
-                      value={formData.brochureUrl || ""} onChange={(e) => setFormData({...formData, brochureUrl: e.target.value})} 
-                    />
+                  <div className="flex justify-between items-center px-1">
+                    <label className="text-[11px] font-bold text-slate-500 uppercase tracking-tight">Brochure Link / Attachment</label>
+                    {formData.brochureUrl && formData.brochureUrl.startsWith('data:') && (
+                        <span className="text-[10px] text-emerald-500 font-bold flex items-center gap-1">
+                          <ShieldCheck size={12} /> PDF ATTACHED
+                        </span>
+                    )}
+                  </div>
+                  
+                  <div className="flex flex-col gap-2">
+                    <div className="relative">
+                        <FileBadge size={14} className="absolute left-3 top-3 text-slate-400" />
+                        <input 
+                        type="text" placeholder="https://..." 
+                        className="w-full pl-9 pr-32 p-2.5 rounded-lg text-sm border border-slate-200 focus:border-[#00b4d8] outline-none" 
+                        value={formData.brochureUrl && !formData.brochureUrl.startsWith('data:') ? formData.brochureUrl : ""} 
+                        onChange={(e) => setFormData({...formData, brochureUrl: e.target.value, brochureFileName: undefined})} 
+                        />
+                        {/* <div className="absolute right-1 top-1 flex items-center gap-1">
+                            <label className="bg-slate-100 hover:bg-slate-200 text-slate-600 px-3 py-1.5 rounded-md text-[11px] font-bold cursor-pointer transition-colors border border-slate-200 flex items-center gap-1.5">
+                                <Plus size={14} /> Upload PDF
+                                <input 
+                                    type="file" 
+                                    accept="application/pdf" 
+                                    className="hidden" 
+                                    onChange={async (e) => {
+                                        const file = e.target.files?.[0];
+                                        if (file) {
+                                            const reader = new FileReader();
+                                            reader.onload = (event) => {
+                                                const base64 = event.target?.result as string;
+                                                setFormData({
+                                                    ...formData, 
+                                                    brochureUrl: base64,
+                                                    brochureFileName: file.name
+                                                });
+                                            };
+                                            reader.readAsDataURL(file);
+                                        }
+                                    }}
+                                />
+                            </label>
+                            {formData.brochureUrl && (
+                                <button 
+                                    type="button"
+                                    onClick={() => setFormData({...formData, brochureUrl: "", brochureFileName: undefined})}
+                                    className="p-2 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-md transition-all"
+                                    title="Remove Brochure"
+                                >
+                                    <X size={16} />
+                                </button>
+                            )}
+                        </div> */}
+                    </div>
+                    
+                    {formData.brochureFileName && (
+                        <div className="flex items-center gap-2 px-3 py-1.5 bg-blue-50/50 border border-blue-100 rounded-lg">
+                            <FileText size={12} className="text-blue-500" />
+                            <span className="text-[11px] font-medium text-blue-700 truncate max-w-[300px]">{formData.brochureFileName}</span>
+                            <span className="text-[9px] text-blue-400 uppercase font-bold ml-auto">Local Archive</span>
+                        </div>
+                    )}
                   </div>
                 </div>
               </section>
+
+              {/* SEO Section */}
+              {/* <section className="space-y-4">
+                <h3 className="text-[#00b4d8] text-[11px] font-bold tracking-widest uppercase flex items-center gap-2 border-b pb-2">
+                  <Globe size={14} /> Marketing & SEO (Optional)
+                </h3>
+                <div className="space-y-1">
+                  <label className="text-[11px] font-bold text-slate-500 uppercase tracking-tight">Focus Meta Title</label>
+                  <input 
+                    type="text" placeholder="Best Engineering College in..." 
+                    className="w-full p-2.5 rounded-lg text-sm border border-slate-200 focus:border-[#00b4d8] outline-none" 
+                    value={formData.metaTitle || ""} onChange={(e) => setFormData({...formData, metaTitle: e.target.value})} 
+                  />
+                </div>
+                <div className="space-y-1">
+                  <label className="text-[11px] font-bold text-slate-500 uppercase tracking-tight">Meta Description / Keywords</label>
+                  <textarea 
+                    rows={2} placeholder="Brief marketing summary for search engines..." 
+                    className="w-full p-2.5 rounded-lg text-sm border border-slate-200 focus:border-[#00b4d8] outline-none resize-none" 
+                    value={formData.metaDescription || ""} 
+                    onChange={(e) => setFormData({...formData, metaDescription: e.target.value})} 
+                  />
+                </div>
+              </section> */}
             </div>
 
           </form>

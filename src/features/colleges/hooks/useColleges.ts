@@ -103,7 +103,7 @@ export function useColleges(initialFilter: 'ALL' | 'ENGINEERING' | 'POLYTECHNIC'
     };
 
     try {
-      const payload = mapToBackend({ courseMatrix: updatedMatrix });
+      const payload = mapToBackend({ ...college, courseMatrix: updatedMatrix });
       const response = await http.put<{ success: boolean; data: any }>(
         `${API_ENDPOINTS.COLLEGES}/${collegeId}`,
         payload
@@ -150,22 +150,50 @@ export function useColleges(initialFilter: 'ALL' | 'ENGINEERING' | 'POLYTECHNIC'
   const saveCollege = useCallback(async (id: number | null, data: Partial<College>) => {
     try {
       const payload = mapToBackend(data);
-      let response;
       
+      // Define final data to send
+      let body: any = payload;
+      let useFormData = false;
+
+      // Check if we have a base64 brochure to upload as a file
+      if (payload.brochureUrl && payload.brochureUrl.startsWith('data:application/pdf;base64,')) {
+        useFormData = true;
+        const formData = new FormData();
+        
+        // Add only primitive fields to form data
+        // We skip internal UI helpers that have been mapped
+        const skipFields = ['brochureUrl', 'courseMatrix', 'contacts', 'category', 'isActive'];
+        
+        Object.entries(payload).forEach(([key, value]) => {
+          if (!skipFields.includes(key) && value !== undefined && value !== null) {
+            formData.append(key, value.toString());
+          }
+        });
+
+        // Convert base64 to Blob and append as 'brochure' (matching backend field name)
+        const base64Data = payload.brochureUrl.split(',')[1];
+        const blob = await (await fetch(`data:application/pdf;base64,${base64Data}`)).blob();
+        formData.append('brochure', blob, payload.brochureFileName || 'brochure.pdf');
+        
+        body = formData;
+      }
+
+      let response;
       if (id) {
         response = await http.put<{ success: boolean; data: any }>(
           `${API_ENDPOINTS.COLLEGES}/${id}`,
-          payload
+          body
         );
       } else {
         // If specific filtered list, default to that type
-        if (!payload.type && currentFilter !== 'ALL') payload.type = currentFilter;
-        // Default to Engineering if somehow still missing
-        if (!payload.type) payload.type = 'ENGINEERING';
+        if (!body.type && currentFilter !== 'ALL') {
+          if (useFormData) (body as FormData).append('type', currentFilter);
+          else body.type = currentFilter;
+        }
         
         response = await http.post<{ success: boolean; data: any }>(
           `${API_ENDPOINTS.COLLEGES}`,
-          payload
+          body
         );
       }
 

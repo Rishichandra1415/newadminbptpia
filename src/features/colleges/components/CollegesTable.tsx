@@ -9,10 +9,11 @@ import {
     Mail, ExternalLink,
     ShieldCheck, EyeOff,
     ChevronLeft, ChevronRight,
-    Filter
+    Filter,
+    FileText
 } from 'lucide-react';
 import { CollegesTableProps, College, CollegeType } from "../types";
-import { CourseToggleGroup } from "./CourseToggleGroup";
+
 import { capitalizeWords } from "@/shared/utils/string-utils";
 
 interface ExtendedCollegesTableProps extends Omit<CollegesTableProps, 'category'> {
@@ -121,7 +122,7 @@ export function CollegesTable({
       </div>
 
       {/* DATA TABLE SECTION */}
-      <div className="flex-1 bg-white rounded-md border border-slate-200 shadow-sm overflow-hidden flex flex-col min-h-0 max-h-[calc(100vh-220px)]">
+      <div className="flex-1 bg-white rounded-md border border-slate-200 shadow-sm flex flex-col min-h-0">
         <div className="flex-1 overflow-auto custom-scrollbar text-left">
           <table className="w-full text-left border-collapse whitespace-nowrap lg:whitespace-normal min-w-[1200px]">
             <thead className="sticky top-0 z-10 bg-slate-50">
@@ -148,9 +149,22 @@ export function CollegesTable({
                              <School size={20} />
                         </div>
                         <div className="flex flex-col gap-0.5 min-w-0">
-                            <span className="font-bold text-slate-800 text-[14px] leading-tight truncate-two-lines whitespace-normal pr-4">
-                                {capitalizeWords(college.name)}
-                            </span>
+                             <div className="flex items-center gap-2">
+                                <span className="font-bold text-slate-800 text-[14px] leading-tight truncate-two-lines whitespace-normal pr-4">
+                                    {capitalizeWords(college.name)}
+                                </span>
+                                {college.brochureUrl && (
+                                  <a 
+                                    href={college.brochureUrl} 
+                                    target="_blank" 
+                                    rel="noopener noreferrer"
+                                    className="p-1.5 bg-red-50 text-red-500 rounded hover:bg-red-100 transition-colors"
+                                    title="View Brochure PDF"
+                                  >
+                                    <FileText size={14} />
+                                  </a>
+                                )}
+                             </div>
                             
                             {filter === 'ALL' && (
                               <div className="flex items-center gap-2 mb-1">
@@ -181,60 +195,64 @@ export function CollegesTable({
                     <div className="flex flex-col gap-2">
                         <div className="flex items-center justify-between px-1">
                           <span className="text-[9px] font-bold text-slate-300 uppercase tracking-widest italic">Management & Disciplines</span>
-                          {Object.values(college.courseMatrix).filter(c => c.isEnabled).length > 0 && (
-                            <span className="text-[10px] bg-blue-50 text-blue-600 px-1.5 py-0.5 rounded font-black border border-blue-100">
-                              {Object.values(college.courseMatrix).filter(c => c.isEnabled).length} ACTIVE
-                            </span>
-                          )}
+
                         </div>
                         
-                        {/* List of active departments */}
-                        <div className="flex flex-wrap gap-1 mb-1">
+                        {/* List of active departments with enhanced styling */}
+                        <div className="flex flex-wrap gap-1.5 mb-1">
                           {Object.entries(college.courseMatrix)
                             .filter(([_, data]) => data.isEnabled)
                             .map(([code, data]) => (
-                                <span key={code} className="text-[10px] font-bold text-slate-500 bg-slate-100 px-1.5 py-0.5 rounded border border-slate-200">
-                                  {code} <span className="text-blue-500 ml-0.5">{data.seats}</span>
-                                </span>
+                                <div key={code} className="flex items-center bg-white border border-slate-200 rounded overflow-hidden shadow-sm h-7">
+                                  <div className="bg-slate-100 px-2 h-full flex items-center border-r border-slate-200">
+                                    <span className="text-[10px] font-black text-slate-600 tracking-tighter">{code}</span>
+                                  </div>
+                                  <div className="px-2 h-full flex items-center bg-blue-50/30">
+                                    <span className="text-[11px] font-black text-blue-600">{data.seats}</span>
+                                  </div>
+                                </div>
                             ))}
                           {Object.values(college.courseMatrix).filter(c => c.isEnabled).length === 0 && (
                             <span className="text-[10px] text-slate-400 italic font-medium px-1">No disciplines active</span>
                           )}
                         </div>
-                        <CourseToggleGroup 
-                          category={college.type?.toLowerCase() as 'engineering' | 'polytechnic'}
-                          selectedCourses={college.courseMatrix}
-                          onToggle={(code) => onToggleCourse?.(college.id, code)}
-                        />
+
                     </div>
                   </td>
 
                   {/* Location */}
                   <td className="p-3 md:p-4">
-                    <div className="flex flex-col gap-1">
-                        <div className="flex items-center gap-1.5 text-[13px] text-slate-700">
-                            <MapPin size={12} className="text-red-400" />
-                            <span className="font-semibold">{college.district}</span>
+                    <div className="flex flex-col gap-0.5">
+                        <div className="flex items-center gap-1.5 text-[13px] text-slate-800">
+                            <MapPin size={12} className="text-rose-500 shrink-0" />
+                            <span className="font-bold">{college.city || college.district}</span>
+                            {college.city && (
+                              <span className="text-slate-400 font-medium text-[11px]">({college.district})</span>
+                            )}
                         </div>
-                        <span className="text-[10px] text-slate-400 uppercase tracking-widest pl-4">
+                        <span className="text-[9px] text-slate-400 font-black uppercase tracking-widest pl-4">
                             {college.state} State
                         </span>
                     </div>
                   </td>
                   
-                  {/* Status */}
+                  {/* Status Toggle Switch */}
                   <td className="p-3 md:p-4 text-center">
-                    <button 
-                        onClick={() => onToggleStatus?.(college.id)}
-                        className={`inline-flex items-center justify-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-bold transition-all border
-                           ${college.isActive 
-                           ? 'bg-emerald-50 text-emerald-600 border-emerald-100 hover:bg-emerald-100' 
-                           : 'bg-slate-100 text-slate-400 border-slate-200 hover:bg-slate-200'
-                       }`}
-                    >
-                        {college.isActive ? <ShieldCheck size={12} /> : <EyeOff size={12} />}
+                    <div className="flex flex-col items-center gap-1">
+                      <button 
+                          onClick={() => onToggleStatus?.(college.id)}
+                          className={`relative inline-flex h-5 w-10 shrink-0 cursor-pointer items-center rounded-full transition-colors duration-200 ease-in-out focus:outline-none ring-offset-2 focus:ring-2 focus:ring-blue-100
+                            ${college.isActive ? 'bg-emerald-500' : 'bg-slate-300'}`}
+                      >
+                        <span 
+                          className={`pointer-events-none inline-block h-3.5 w-3.5 transform rounded-full bg-white shadow-sm ring-0 transition duration-200 ease-in-out
+                            ${college.isActive ? 'translate-x-5.5' : 'translate-x-1'}`} 
+                        />
+                      </button>
+                      <span className={`text-[9px] font-black tracking-tighter ${college.isActive ? 'text-emerald-600' : 'text-slate-400'}`}>
                         {college.isActive ? 'ACTIVE' : 'HIDDEN'}
-                    </button>
+                      </span>
+                    </div>
                   </td>
                   
                   {/* Actions */}

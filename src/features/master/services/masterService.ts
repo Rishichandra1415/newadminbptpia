@@ -51,11 +51,11 @@ export const masterService = {
     return apiClient<{ success: boolean; data: any[] }>(API_ENDPOINTS.MASTER.BRANCHES);
   },
 
-  createBranch: async (data: { branchName: string; courseId: number; courseType: string }) => {
+  createBranch: async (data: { branchName: string; courseId: number | null; courseType: string }) => {
     return http.post<{ success: boolean; data: any }>(API_ENDPOINTS.MASTER.BRANCHES, data);
   },
 
-  updateBranch: async (id: number, data: { branchName?: string; courseId?: number; courseType?: string; status?: string }) => {
+  updateBranch: async (id: number, data: { branchName?: string; courseId?: number | null; courseType?: string; status?: string }) => {
     return http.put<{ success: boolean; data: any }>(`${API_ENDPOINTS.MASTER.BRANCHES}/${id}`, data);
   },
 

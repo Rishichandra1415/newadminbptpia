@@ -98,27 +98,28 @@ export function BranchModal({
                             </select>
                         </div>
 
-                        <div className="space-y-1.5">
-                            <label className="text-[12px] md:text-[13px] font-medium text-slate-500 flex items-center gap-1.5">
-                                Belongs to Course <span className="text-red-500">*</span>
-                            </label>
-                            <select 
-                                name="courseId" 
-                                required 
-                                className="w-full p-2.5 rounded-lg text-sm text-slate-700 outline-none transition-all border border-slate-200 bg-white focus:border-[#00b4d8] shadow-sm" 
-                                value={formData.courseId} 
-                                onChange={(e) => setFormData({...formData, courseId: e.target.value})} 
-                            >
-                                <option value="" disabled>-- Select Course --</option>
-                                {courses
-                                  .filter(course => course.courseType === formData.courseType)
-                                  .map(course => (
-                                    <option key={course.id} value={course.id}>
-                                        {course.name}
-                                    </option>
-                                ))}
-                            </select>
-                        </div>
+{/* Commented out as per user request */}
+{/* <div className="space-y-1.5">
+    <label className="text-[12px] md:text-[13px] font-medium text-slate-500 flex items-center gap-1.5">
+        Belongs to Course <span className="text-red-500">*</span>
+    </label>
+    <select 
+        name="courseId" 
+        required 
+        className="w-full p-2.5 rounded-lg text-sm text-slate-700 outline-none transition-all border border-slate-200 bg-white focus:border-[#00b4d8] shadow-sm" 
+        value={formData.courseId} 
+        onChange={(e) => setFormData({...formData, courseId: e.target.value})} 
+    >
+        <option value="" disabled>-- Select Course --</option>
+        {courses
+            .filter(course => course.courseType === formData.courseType)
+            .map(course => (
+            <option key={course.id} value={course.id}>
+                {course.name}
+            </option>
+        ))}
+    </select>
+</div> */}
 
                         <div className="space-y-1.5">
                             <label className="text-[12px] md:text-[13px] font-medium text-slate-500 flex items-center gap-1.5">

@@ -22,7 +22,7 @@ export interface CourseEntry {
 export interface BranchEntry {
   id: number;
   name: string;
-  courseId?: number;
+  courseId?: number | null;
   courseType?: string;
   course?: CourseEntry;
   isActive: boolean;

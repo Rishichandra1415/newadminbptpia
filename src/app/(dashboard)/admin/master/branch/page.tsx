@@ -94,7 +94,7 @@ export default function BranchesPage() {
     try {
       const payload = {
         branchName: formData.name,
-        courseId: parseInt(formData.courseId),
+        courseId: formData.courseId ? parseInt(formData.courseId) : null,
         courseType: formData.courseType,
         status: formData.isActive ? 'ACTIVE' : 'INACTIVE'
       };

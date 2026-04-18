@@ -42,7 +42,7 @@ export default function AdmissionFormPage() {
           permanentAddress: item.permanentAddress,
           courseApplied: item.courseAppliedFor,
           branchApplied: item.branchAppliedFor,
-          examCenter: `College ID: ${item.collegeId}`,
+          examCenter: `EC-${String(item.examCenterId).padStart(3, '0')}`,
           photoUrl: item.passportPhotoUrl ? `${FILE_BASE_URL}${item.passportPhotoUrl}` : undefined,
           signatureUrl: item.signatureUrl ? `${FILE_BASE_URL}${item.signatureUrl}` : undefined,
           idDocumentType: item.identityDocType,
@@ -81,8 +81,8 @@ export default function AdmissionFormPage() {
   };
 
   return (
-    <div className="p-4 md:p-6 min-h-screen bg-slate-50/30">
-        <div className="max-w-[1600px] mx-auto">
+    <div className="h-full bg-slate-50/30">
+        <div className="h-full max-w-[1600px] mx-auto">
             <AdmissionTable 
                 data={admissions}
                 isLoading={isLoading}

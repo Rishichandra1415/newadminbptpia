@@ -21,12 +21,15 @@ export function ExamCentersTable({
   isLoading
 }: ExamCenterTableProps) {
   const [searchTerm, setSearchTerm] = useState("");
+  const [currentFilter, setCurrentFilter] = useState<'ALL' | 'ENGINEERING' | 'POLYTECHNIC'>('ALL');
   const [currentPage, setCurrentPage] = useState(1);
-  const pageSize = 7;
+  const pageSize = 10; // Increased page size for better view
 
-  const filteredData = data.filter(item => 
-    item.name.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  const filteredData = data.filter(item => {
+    const matchesSearch = item.name.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesFilter = currentFilter === 'ALL' || item.courseType === currentFilter;
+    return matchesSearch && matchesFilter;
+  });
 
   // Pagination Logic
   const totalItemsCount = filteredData?.length || 0;
@@ -59,7 +62,7 @@ export function ExamCentersTable({
         </div>
         
         <div className="flex flex-wrap items-center gap-2 w-full md:w-auto">
-          <div className="flex flex-grow md:flex-grow-0 items-center bg-white px-3 py-2 rounded-md border border-slate-200 shadow-sm h-10 w-full md:w-72">
+          <div className="flex flex-grow md:flex-grow-0 items-center bg-white px-3 py-2 rounded-md border border-slate-200 shadow-sm h-10 w-full md:w-64">
             <Search className="text-slate-400 mr-2 shrink-0" size={16} />
             <input 
               type="text" 
@@ -70,6 +73,22 @@ export function ExamCentersTable({
                 setCurrentPage(1);
               }}
             />
+          </div>
+
+          <div className="flex items-center bg-white px-3 py-2 rounded-md border border-slate-200 shadow-sm h-10 w-full md:w-44">
+            <Filter className="text-[#00b4d8] mr-2 shrink-0" size={16} />
+            <select 
+                className="bg-transparent border-none outline-none text-[12px] font-bold w-full text-slate-600 cursor-pointer appearance-none"
+                value={currentFilter}
+                onChange={(e) => {
+                    setCurrentFilter(e.target.value as any);
+                    setCurrentPage(1);
+                }}
+            >
+                <option value="ALL">ALL CATEGORIES</option>
+                <option value="ENGINEERING">ENGINEERING</option>
+                <option value="POLYTECHNIC">POLYTECHNIC</option>
+            </select>
           </div>
           
           <button 
@@ -98,6 +117,7 @@ export function ExamCentersTable({
               <tr className="border-b border-slate-200 text-[11px] md:text-[12px] text-[#00b4d8] tracking-widest uppercase font-bold shadow-sm">
                 <th className="p-3 md:p-4 w-[60px] text-center bg-slate-50">#</th> 
                 <th className="p-3 md:p-4 bg-slate-50 text-left">Center Location Summary</th>
+                <th className="p-3 md:p-4 w-[150px] text-left bg-slate-50">Course Type</th>
                 <th className="p-3 md:p-4 w-[120px] text-center bg-slate-50">Auth ID</th>
                 <th className="p-3 md:p-4 w-[180px] text-center bg-slate-50">Status</th>
                 <th className="p-3 md:p-4 w-[120px] text-right pr-8 bg-slate-50">Actions</th>
@@ -106,7 +126,7 @@ export function ExamCentersTable({
             <tbody className="divide-y divide-slate-50 text-left">
               {isLoading ? (
                 <tr>
-                  <td colSpan={5} className="p-20 text-center">
+                  <td colSpan={6} className="p-20 text-center">
                     <div className="flex flex-col items-center justify-center gap-3">
                       <div className="h-10 w-10 border-4 border-cyan-100 border-t-[#00b4d8] rounded-full animate-spin" />
                       <p className="text-slate-400 text-xs font-bold uppercase tracking-widest animate-pulse">Syncing centers...</p>
@@ -134,6 +154,16 @@ export function ExamCentersTable({
                         </div>
                     </div>
                   </td>
+                  
+                  <td className="p-3 md:p-4 text-left">
+                    <span className={`text-[10px] px-2.5 py-1 rounded-md font-bold uppercase tracking-wider border shadow-sm ${
+                        center.courseType === 'ENGINEERING' 
+                        ? 'bg-indigo-50 text-indigo-600 border-indigo-100' 
+                        : 'bg-orange-50 text-orange-600 border-orange-100'
+                    }`}>
+                        {center.courseType}
+                    </span>
+                  </td>
 
                   <td className="p-3 md:p-4 text-center">
                     <span className="text-[13px] font-bold text-slate-700 bg-slate-50 px-2.5 py-1 rounded border border-slate-100 uppercase tracking-tighter">
@@ -144,18 +174,18 @@ export function ExamCentersTable({
                   {/* 🔄 STANDARDIZED PILL TOGGLE UI */}
                   <td className="p-3 md:p-4 text-center">
                     <div className="flex items-center justify-center gap-3 group/toggle">
-                       <span className={`text-[10px] font-bold tracking-wide transition-colors ${center.isActive ? 'text-green-500' : 'text-slate-300'}`}>
-                          {center.isActive ? 'ACTIVE' : 'HIDDEN'}
+                       <span className={`text-[10px] font-bold tracking-wide transition-colors ${center.status === 'ACTIVE' ? 'text-green-500' : 'text-slate-300'}`}>
+                          {center.status === 'ACTIVE' ? 'ACTIVE' : 'HIDDEN'}
                        </span>
                        <button 
                           onClick={() => onToggleStatus(center.id)}
                           className={`w-8 h-4.5 rounded-full relative transition-all duration-300 shadow-inner ${
-                             center.isActive ? 'bg-green-500' : 'bg-slate-200'
+                             center.status === 'ACTIVE' ? 'bg-green-500' : 'bg-slate-200'
                           }`}
-                          title={center.isActive ? "Disable center" : "Enable center"}
+                          title={center.status === 'ACTIVE' ? "Disable center" : "Enable center"}
                        >
                           <div className={`absolute top-0.5 w-3.5 h-3.5 rounded-full bg-white shadow-md transition-all duration-300 ${
-                             center.isActive ? 'right-0.5' : 'left-0.5'
+                             center.status === 'ACTIVE' ? 'right-0.5' : 'left-0.5'
                           }`} />
                        </button>
                     </div>
@@ -182,7 +212,7 @@ export function ExamCentersTable({
                 </tr>
               )) : (
                 <tr>
-                  <td colSpan={5} className="p-16 text-center">
+                  <td colSpan={6} className="p-16 text-center">
                     <div className="flex flex-col items-center justify-center text-slate-400">
                       <Icons.ShieldAlert size={40} className="mb-3 text-slate-200" />
                       <p className="text-sm font-semibold text-slate-600 italic">No examination centers found</p>

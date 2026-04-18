@@ -19,9 +19,9 @@ export const navItems: NavItem[] = [
     items: [
       { title: "State", href: "/admin/master/state" },
       { title: "City", href: "/admin/master/city" },
-      { title: "Course Applied For", href: "/admin/master/course" },
+      // { title: "Course Applied For", href: "/admin/master/course" },
       { title: "Branch Applied For", href: "/admin/master/branch" },
-      // { title: "Choice Of Colleges", href: "/admin/master/examination-center" },
+      { title: "Choice Of Examcenter", href: "/admin/master/examination-center" },
     ],
   },
   {

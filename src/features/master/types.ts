@@ -31,7 +31,9 @@ export interface BranchEntry {
 export interface ExamCenterEntry {
   id: number;
   name: string;
-  isActive: boolean;
+  courseType: 'ENGINEERING' | 'POLYTECHNIC';
+  status: 'ACTIVE' | 'INACTIVE';
+  orderIdx?: number;
 }
 
 export interface MasterTableProps {

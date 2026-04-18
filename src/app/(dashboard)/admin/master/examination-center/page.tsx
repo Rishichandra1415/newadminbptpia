@@ -1,28 +1,38 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { ExamCentersTable } from "@/features/master/components/ExamCenters/ExamCentersTable";
 import { ExamCenterModal } from "@/features/master/components/ExamCenters/ExamCenterModal";
 import { ExamCenterEntry } from "@/features/master/types";
-
-// DEMO DATA AS REQUESTED
-const DEMO_CENTERS: ExamCenterEntry[] = [
-  { id: 1, name: "Patna (Govt. Polytechnic)", isActive: true },
-  { id: 2, name: "Gaya (Gaya College)", isActive: true },
-  { id: 3, name: "Muzaffarpur (LS College)", isActive: true },
-  { id: 4, name: "Bhagalpur (TNB College)", isActive: true },
-  { id: 5, name: "Darbhanga (CM Science College)", isActive: true },
-  { id: 6, name: "Purnia (Purnia College)", isActive: true },
-  { id: 7, name: "Katihar (Katihar Medical College)", isActive: true },
-  { id: 8, name: "Munger (RD&DJ College)", isActive: false },
-  { id: 9, name: "Sasaram (SP Jain College)", isActive: true },
-];
+import { masterService } from "@/features/master/services/masterService";
+import { Toast } from "@/shared/components/ui/toast";
 
 export default function ExamCentersPage() {
-  const [centers, setCenters] = useState<ExamCenterEntry[]>(DEMO_CENTERS);
+  const [centers, setCenters] = useState<ExamCenterEntry[]>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingCenter, setEditingCenter] = useState<ExamCenterEntry | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [toast, setToast] = useState<{ message: string; type: "success" | "error" | "info" } | null>(null);
+
+  const fetchCenters = useCallback(async () => {
+    setIsLoading(true);
+    try {
+      const response = await masterService.getExamCenters();
+      if (response.success) {
+        setCenters(response.data);
+      } else {
+        setToast({ message: "Failed to load examination centers.", type: "error" });
+      }
+    } catch (error) {
+      setToast({ message: "Server connection error.", type: "error" });
+    } finally {
+      setIsLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    fetchCenters();
+  }, [fetchCenters]);
 
   const handleAdd = () => {
     setEditingCenter(null);
@@ -34,44 +44,76 @@ export default function ExamCentersPage() {
     setIsModalOpen(true);
   };
 
-  const handleDelete = (id: number) => {
+  const handleDelete = async (id: number) => {
     if (window.confirm("Are you sure you want to delete this examination center?")) {
-      setCenters(centers.filter(c => c.id !== id));
+      try {
+        const response = await masterService.deleteExamCenter(id);
+        if (response.success) {
+          setCenters(prev => prev.filter(c => c.id !== id));
+          setToast({ message: "Center deleted successfully.", type: "success" });
+        } else {
+          setToast({ message: "Failed to delete center.", type: "error" });
+        }
+      } catch (error) {
+        setToast({ message: "Error deleting center.", type: "error" });
+      }
     }
   };
 
-  const handleToggleStatus = (id: number) => {
-    setCenters(centers.map(c => 
-      c.id === id ? { ...c, isActive: !c.isActive } : c
-    ));
+  const handleToggleStatus = async (id: number) => {
+    const center = centers.find(c => c.id === id);
+    if (!center) return;
+
+    const newStatus = center.status === 'ACTIVE' ? 'INACTIVE' : 'ACTIVE';
+    try {
+      const response = await masterService.updateExamCenter(id, { status: newStatus });
+      if (response.success) {
+        setCenters(prev => prev.map(c => 
+          c.id === id ? { ...c, status: newStatus } : c
+        ));
+        setToast({ message: `Center ${newStatus === 'ACTIVE' ? 'activated' : 'deactivated'} successfully.`, type: "success" });
+      } else {
+        setToast({ message: "Failed to update status.", type: "error" });
+      }
+    } catch (error) {
+      setToast({ message: "Error updating status.", type: "error" });
+    }
   };
 
-  const handleSave = async (formData: { name: string; isActive: boolean }) => {
+  const handleSave = async (formData: { name: string; courseType: string; status: string }) => {
     setIsLoading(true);
-    // Simulate API delay
-    await new Promise(resolve => setTimeout(resolve, 600));
+    try {
+      let response;
+      if (editingCenter) {
+        // Update
+        response = await masterService.updateExamCenter(editingCenter.id, formData);
+      } else {
+        // Create
+        response = await masterService.createExamCenter(formData);
+      }
 
-    if (editingCenter) {
-      // Update
-      setCenters(centers.map(c => 
-        c.id === editingCenter.id ? { ...c, ...formData } : c
-      ));
-    } else {
-      // Create
-      const newCenter: ExamCenterEntry = {
-        id: Math.max(0, ...centers.map(c => c.id)) + 1,
-        ...formData
-      };
-      setCenters([newCenter, ...centers]);
+      if (response.success) {
+        setToast({ 
+          message: editingCenter ? "Center updated successfully!" : "New center added successfully!", 
+          type: "success" 
+        });
+        fetchCenters(); // Refresh the list
+        return true;
+      } else {
+        setToast({ message: "Failed to save exam center.", type: "error" });
+        return false;
+      }
+    } catch (error) {
+      setToast({ message: "Error connecting to server.", type: "error" });
+      return false;
+    } finally {
+      setIsLoading(false);
     }
-    
-    setIsLoading(false);
-    return true;
   };
 
   return (
-    <div className="p-4 md:p-6 min-h-screen bg-slate-50/30">
-        <div className="max-w-[1600px] mx-auto">
+    <div className="h-full bg-slate-50/30">
+        <div className="h-full max-w-[1600px] mx-auto">
             <ExamCentersTable 
                 data={centers}
                 isLoading={isLoading}
@@ -87,6 +129,14 @@ export default function ExamCentersPage() {
                 onClose={() => setIsModalOpen(false)}
                 onSave={handleSave}
             />
+
+            {toast && (
+                <Toast 
+                    message={toast.message} 
+                    type={toast.type} 
+                    onClose={() => setToast(null)} 
+                />
+            )}
         </div>
     </div>
   );

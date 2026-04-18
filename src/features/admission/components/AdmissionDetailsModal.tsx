@@ -113,7 +113,7 @@ export function AdmissionDetailsModal({
                                 <DataField label="Course Type" value={data.courseType} />
                                 <DataField label="Course Name" value={data.courseApplied} />
                                 <DataField label="Branch Choice" value={data.branchApplied} />
-                                <DataField label="Exam Center" value={data.examCenter} />
+                                <DataField label="Exam Center Choice" value={data.examCenter} />
                             </div>
                         </div>
 

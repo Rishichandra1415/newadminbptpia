@@ -9,7 +9,7 @@ export default function DashboardPage() {
   ];
 
   return (
-    <div className="flex flex-col gap-8">
+    <div className="h-full overflow-auto custom-scrollbar flex flex-col gap-8 p-1">
       {/* Welcome Header */}
       <div className="flex items-end justify-between">
         <div className="flex flex-col gap-1">

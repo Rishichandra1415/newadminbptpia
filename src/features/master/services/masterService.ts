@@ -62,4 +62,21 @@ export const masterService = {
   deleteBranch: async (id: number) => {
     return http.delete<{ success: boolean }>(`${API_ENDPOINTS.MASTER.BRANCHES}/${id}`);
   },
+  
+  // --- Exam Centers ---
+  getExamCenters: async () => {
+    return apiClient<{ success: boolean; data: any[] }>(API_ENDPOINTS.MASTER.EXAM_CENTERS);
+  },
+
+  createExamCenter: async (data: { name: string; courseType: string; status?: string }) => {
+    return http.post<{ success: boolean; data: any }>(API_ENDPOINTS.MASTER.EXAM_CENTERS, data);
+  },
+
+  updateExamCenter: async (id: number, data: { name?: string; courseType?: string; status?: string }) => {
+    return http.put<{ success: boolean; data: any }>(`${API_ENDPOINTS.MASTER.EXAM_CENTERS}/${id}`, data);
+  },
+
+  deleteExamCenter: async (id: number) => {
+    return http.delete<{ success: boolean }>(`${API_ENDPOINTS.MASTER.EXAM_CENTERS}/${id}`);
+  },
 };

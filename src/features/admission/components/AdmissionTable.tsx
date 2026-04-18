@@ -93,7 +93,7 @@ export function AdmissionTable({
               <tr className="border-b border-slate-200 text-[12px] md:text-[13px] text-[#00b4d8] tracking-wide uppercase font-semibold shadow-sm text-left">
                 <th className="p-3 md:p-4 w-[50px] text-center bg-slate-50">#</th> 
                 <th className="p-3 md:p-4 w-[25%] bg-slate-50">Student Profile</th>
-                <th className="p-3 md:p-4 w-[25%] bg-slate-50 text-left">Academic Choice</th>
+                <th className="p-3 md:p-4 w-[25%] bg-slate-50 text-left">Academic Choice & Centre</th>
                 <th className="p-3 md:p-4 w-[15%] text-center bg-slate-50">Payment Status</th>
                 <th className="p-3 md:p-4 w-[12%] text-center bg-slate-50">Applied Date</th>
                 <th className="p-3 md:p-4 w-[120px] text-right pr-6 bg-slate-50">Actions</th>
@@ -149,7 +149,7 @@ export function AdmissionTable({
                             <span className="text-[13px] text-slate-700 font-bold">{form.branchApplied}</span>
                         </div>
                         <span className="text-[11px] text-slate-400 font-medium pl-6 uppercase tracking-wider">
-                            {form.courseApplied}
+                            {form.courseApplied} | {form.examCenter}
                         </span>
                     </div>
                   </td>

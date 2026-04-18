@@ -96,7 +96,7 @@ export default function ContactLeadsPage() {
   }
 
   return (
-    <div className="p-4 md:p-6 bg-gray-50/50 min-h-screen">
+    <div className="h-full bg-slate-50/30">
       {isLoading ? (
         <div className="w-full h-[60vh] flex flex-col items-center justify-center gap-4 text-center">
           <div className="h-12 w-12 border-4 border-primary border-t-transparent rounded-full animate-spin"></div>

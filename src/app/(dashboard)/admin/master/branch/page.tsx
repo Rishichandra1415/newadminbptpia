@@ -125,8 +125,8 @@ export default function BranchesPage() {
   };
 
   return (
-    <div className="p-4 md:p-6 min-h-screen bg-slate-50/30">
-        <div className="max-w-[1600px] mx-auto">
+    <div className="h-full bg-slate-50/30">
+        <div className="h-full max-w-[1600px] mx-auto">
             <BranchesTable 
                 data={branches}
                 isLoading={isLoading}

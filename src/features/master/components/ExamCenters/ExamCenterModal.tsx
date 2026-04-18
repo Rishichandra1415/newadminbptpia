@@ -15,7 +15,8 @@ export function ExamCenterModal({
 }: ExamCenterModalProps) {
   const [formData, setFormData] = useState({
     name: "",
-    isActive: true
+    courseType: "ENGINEERING" as 'ENGINEERING' | 'POLYTECHNIC',
+    status: "ACTIVE" as 'ACTIVE' | 'INACTIVE'
   });
   const [isSaving, setIsSaving] = useState(false);
 
@@ -23,12 +24,14 @@ export function ExamCenterModal({
     if (editData) {
       setFormData({
         name: editData.name,
-        isActive: editData.isActive
+        courseType: editData.courseType || 'ENGINEERING',
+        status: editData.status || 'ACTIVE'
       });
     } else {
       setFormData({
         name: "",
-        isActive: true
+        courseType: "ENGINEERING",
+        status: "ACTIVE"
       });
     }
   }, [editData, isOpen]);
@@ -90,6 +93,22 @@ export function ExamCenterModal({
                             />
                         </div>
 
+                        <div className="space-y-1.5">
+                            <label className="text-[12px] md:text-[13px] font-medium text-slate-500 flex items-center gap-1.5">
+                                Course Type (Category) <span className="text-red-500">*</span>
+                            </label>
+                            <select 
+                                name="courseType" 
+                                required 
+                                className="w-full p-2.5 rounded-lg text-sm text-slate-700 outline-none transition-all border border-slate-200 bg-white focus:border-[#00b4d8] shadow-sm" 
+                                value={formData.courseType} 
+                                onChange={(e) => setFormData({...formData, courseType: e.target.value as any})} 
+                            >
+                                <option value="ENGINEERING">ENGINEERING</option>
+                                <option value="POLYTECHNIC">POLYTECHNIC</option>
+                            </select>
+                        </div>
+
                         {/* Standardized Pill Toggle */}
                         <div className="flex items-center justify-between p-4 rounded-xl bg-slate-50 border border-slate-100">
                             <div className="flex flex-col gap-0.5">
@@ -98,18 +117,18 @@ export function ExamCenterModal({
                             </div>
                             
                             <div className="flex items-center gap-3">
-                                <span className={`text-[10px] font-bold tracking-wide transition-colors ${formData.isActive ? 'text-emerald-600' : 'text-slate-400'}`}>
-                                    {formData.isActive ? 'ACTIVE' : 'HIDDEN'}
+                                <span className={`text-[10px] font-bold tracking-wide transition-colors ${formData.status === 'ACTIVE' ? 'text-emerald-600' : 'text-slate-400'}`}>
+                                    {formData.status === 'ACTIVE' ? 'ACTIVE' : 'HIDDEN'}
                                 </span>
                                 <button 
                                     type="button"
-                                    onClick={() => setFormData({...formData, isActive: !formData.isActive})}
+                                    onClick={() => setFormData({...formData, status: formData.status === 'ACTIVE' ? 'INACTIVE' : 'ACTIVE'})}
                                     className={`w-10 h-5 rounded-full relative transition-all shadow-inner ${
-                                        formData.isActive ? 'bg-emerald-500' : 'bg-slate-300'
+                                        formData.status === 'ACTIVE' ? 'bg-emerald-500' : 'bg-slate-300'
                                     }`}
                                 >
                                     <div className={`absolute top-0.5 w-4 h-4 rounded-full bg-white shadow-md transition-all duration-300 ${
-                                        formData.isActive ? 'right-0.5' : 'left-0.5'
+                                        formData.status === 'ACTIVE' ? 'right-0.5' : 'left-0.5'
                                     }`} />
                                 </button>
                             </div>

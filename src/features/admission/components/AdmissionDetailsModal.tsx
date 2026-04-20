@@ -128,16 +128,19 @@ export function AdmissionDetailsModal({
 
                         {/* 6. Document & Payment Status */}
                         <div className="p-6 bg-emerald-50/30 rounded-2xl border border-emerald-100 space-y-6">
-                            <SectionHeader icon={CreditCard} title="Administrative" color="text-emerald-500" />
+                            <SectionHeader icon={CreditCard} title="Administrative & Payment" color="text-emerald-500" />
                             <div className="flex flex-col gap-6">
                                 <div className="flex items-center justify-between">
                                     <DataField label="Payment Status" value={data.paymentStatus} />
-                                    <div className={`p-1.5 rounded-full ${data.paymentStatus === 'PAID' ? 'bg-emerald-500 text-white' : 'bg-amber-400 text-white'}`}>
+                                    <div className={`p-1.5 rounded-full ${data.paymentStatus === 'PAID' ? 'bg-emerald-500 text-white' : data.paymentStatus === 'FAILED' ? 'bg-red-500 text-white' : 'bg-amber-400 text-white'}`}>
                                         {data.paymentStatus === 'PAID' ? <CheckCircle2 size={16} /> : <Clock size={16} />}
                                     </div>
                                 </div>
+                                <div className="grid grid-cols-1 gap-4">
+                                    <DataField label="Transaction ID" value={data.transactionId || data.razorpayPaymentId} />
+                                    <DataField label="Razorpay Order ID" value={data.razorpayOrderId} />
+                                </div>
                                 <DataField label="Submission Date" value={data.submissionDate} />
-                                <DataField label="Application ID" value={data.idDocumentType} />
                             </div>
                         </div>
 

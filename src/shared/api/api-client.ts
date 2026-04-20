@@ -22,9 +22,11 @@ export async function apiClient<T>(
   const url = `${BASE_URL}${endpoint}`;
   
   const isFormData = options.body instanceof FormData;
+  const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null;
   
   const headers = {
     ...(isFormData ? {} : { "Content-Type": "application/json" }),
+    ...(token ? { "Authorization": `Bearer ${token}` } : {}),
     ...options.headers,
   };
 

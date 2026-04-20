@@ -4,6 +4,7 @@ import React from "react";
 import { Navbar } from "@/shared/components/layout/navbar";
 import { Sidebar } from "@/shared/components/layout/sidebar";
 import { SidebarProvider, useSidebar } from "@/shared/components/layout/sidebar-context";
+import { SocketProvider } from "@/context/SocketContext";
 
 function DashboardContent({ children }: { children: React.ReactNode }) {
   const { isOpen } = useSidebar();
@@ -37,9 +38,11 @@ export default function DashboardLayout({
 }) {
   return (
     <SidebarProvider>
-      <DashboardContent>
-        {children}
-      </DashboardContent>
+      <SocketProvider>
+        <DashboardContent>
+          {children}
+        </DashboardContent>
+      </SocketProvider>
     </SidebarProvider>
   );
 }

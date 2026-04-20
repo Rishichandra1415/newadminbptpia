@@ -49,6 +49,9 @@ export default function AdmissionFormPage() {
           idDocumentUrl: item.identityDocUrl ? `${FILE_BASE_URL}${item.identityDocUrl}` : undefined,
           paymentStatus: item.paymentStatus as AdmissionForm['paymentStatus'],
           feeAmount: 515,
+          razorpayOrderId: item.razorpayOrderId,
+          razorpayPaymentId: item.razorpayPaymentId,
+          transactionId: item.transactionId,
           submissionDate: new Date(item.createdAt).toLocaleDateString('en-IN'),
         }));
         setAdmissions(mapped);

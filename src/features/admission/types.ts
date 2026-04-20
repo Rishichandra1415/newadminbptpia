@@ -29,6 +29,9 @@ export interface AdmissionForm {
   idDocumentUrl?: string;
   paymentStatus: PaymentStatus;
   feeAmount: number;
+  razorpayOrderId?: string;
+  razorpayPaymentId?: string;
+  transactionId?: string;
   submissionDate: string;
 }
 

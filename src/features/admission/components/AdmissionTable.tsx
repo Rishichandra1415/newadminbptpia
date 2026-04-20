@@ -21,15 +21,26 @@ export function AdmissionTable({
   isLoading
 }: AdmissionTableProps) {
   const [searchTerm, setSearchTerm] = useState("");
+  const [statusFilter, setStatusFilter] = useState<string>("ALL");
   const [currentPage, setCurrentPage] = useState(1);
   const pageSize = 7;
 
-  const filteredData = data.filter(item => 
-    item.applicantName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    item.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    item.mobileNumber.includes(searchTerm) ||
-    item.applicationNumber.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  const filteredData = data.filter(item => {
+    const matchesSearch = item.applicantName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      item.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      item.mobileNumber.includes(searchTerm) ||
+      item.applicationNumber.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      (item.transactionId && item.transactionId.toLowerCase().includes(searchTerm.toLowerCase()));
+    
+    const matchesStatus = statusFilter === "ALL" || item.paymentStatus === statusFilter;
+    
+    return matchesSearch && matchesStatus;
+  });
+
+  // Calculate Financials from Filtered Data
+  const totalCollected = filteredData
+    .filter(item => item.paymentStatus === 'PAID')
+    .reduce((sum, item) => sum + (item.feeAmount || 515), 0);
 
   // Pagination Logic
   const totalItems = filteredData.length;
@@ -62,11 +73,26 @@ export function AdmissionTable({
         </div>
         
         <div className="flex flex-wrap items-center gap-2 w-full md:w-auto">
-          <div className="flex flex-grow md:flex-grow-0 items-center bg-white px-3 py-2 rounded-md border border-slate-200 shadow-sm h-10 w-full md:w-80">
+          {/* Status Filter */}
+          <select 
+            value={statusFilter}
+            onChange={(e) => {
+              setStatusFilter(e.target.value);
+              setCurrentPage(1);
+            }}
+            className="h-10 px-3 bg-white border border-slate-200 text-slate-600 text-[13px] font-bold rounded-lg shadow-sm outline-none focus:ring-2 focus:ring-[#00b4d8]/20 focus:border-[#00b4d8] transition-all cursor-pointer min-w-[120px]"
+          >
+            <option value="ALL">All Status</option>
+            <option value="PAID">Paid Only</option>
+            <option value="PENDING">Pending</option>
+            <option value="FAILED">Failed</option>
+          </select>
+
+          <div className="flex flex-grow md:flex-grow-0 items-center bg-white px-3 py-2 rounded-lg border border-slate-200 shadow-sm h-10 w-full md:w-80">
             <Search className="text-slate-400 mr-2 shrink-0" size={16} />
             <input 
               type="text" 
-              placeholder="Search by name, application # or mobile..." 
+              placeholder="Search name, app # or transaction..." 
               onChange={(e) => {
                 setSearchTerm(e.target.value);
                 setCurrentPage(1);
@@ -77,12 +103,36 @@ export function AdmissionTable({
 
           <button 
             onClick={() => window.location.reload()}
-            className="p-2.5 bg-white border border-slate-200 shadow-sm rounded-md text-slate-400 hover:text-slate-600 transition-colors h-10"
+            className="p-2.5 bg-white border border-slate-200 shadow-sm rounded-lg text-slate-400 hover:text-slate-600 transition-colors h-10"
             title="Refresh"
           >
             <RotateCw size={18} />
           </button>
         </div>
+      </div>
+
+      {/* FINANCIAL SUMMARY BAR */}
+      <div className="bg-[#00b4d8]/5 border border-[#00b4d8]/10 rounded-xl p-4 flex flex-col md:flex-row items-center gap-6 shadow-sm">
+          <div className="flex items-center gap-3">
+              <div className="p-2 bg-white rounded-lg shadow-sm border border-[#00b4d8]/20">
+                  <CreditCard className="text-[#00b4d8]" size={20} />
+              </div>
+              <div className="flex flex-col">
+                  <span className="text-[10px] font-black text-[#00b4d8] uppercase tracking-wider">Total Collection (Filtered)</span>
+                  <span className="text-xl font-bold text-slate-800 tracking-tight">₹{totalCollected.toLocaleString()}</span>
+              </div>
+          </div>
+          <div className="hidden md:block w-px h-10 bg-slate-200"></div>
+          <div className="flex gap-6 items-center flex-wrap justify-center md:justify-start">
+              <div className="flex flex-col">
+                  <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Total Paid</span>
+                  <span className="text-sm font-bold text-green-600">{filteredData.filter(i => i.paymentStatus === 'PAID').length} Students</span>
+              </div>
+              <div className="flex flex-col">
+                  <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Awaiting Payment</span>
+                  <span className="text-sm font-bold text-amber-500">{filteredData.filter(i => i.paymentStatus === 'PENDING').length} Students</span>
+              </div>
+          </div>
       </div>
 
       {/* DATA TABLE SECTION */}

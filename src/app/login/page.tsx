@@ -3,25 +3,68 @@
 import React, { useState } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
-import { Mail, Lock, Eye, EyeOff, Loader2, ArrowRight } from "lucide-react";
+import { Mail, Lock, Eye, EyeOff, Loader2, ArrowRight, Phone } from "lucide-react";
+import { toast } from "@/shared/utils/toast-utils";
+
+
 
 export default function LoginPage() {
   const router = useRouter();
+  const [isLogin, setIsLogin] = useState(true);
   const [showPassword, setShowPassword] = useState(false);
+  const [showSignupPassword, setShowSignupPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [phone, setPhone] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
 
-  const handleLogin = (e: React.FormEvent) => {
+
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     
-    // Simulate a network delay
+    try {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/auth/login`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ email, password }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.message || "Invalid credentials");
+      }
+
+      // Store token for future authenticated requests
+      localStorage.setItem("token", data.token);
+      localStorage.setItem("user", JSON.stringify(data.user));
+      
+      toast.success("Welcome back! Login successful.");
+      
+      // Navigate to dashboard
+      router.push("/admin");
+    } catch (error: any) {
+      toast.error(error.message || "Something went wrong. Please try again.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+
+  const handleSignup = (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
     setTimeout(() => {
       setLoading(false);
-      router.push("/admin");
-    }, 1200);
+      setIsLogin(true);
+    }, 1500);
   };
+
 
   return (
     <div className="flex h-screen w-full bg-[#F8FAFC] overflow-hidden">
@@ -70,112 +113,254 @@ export default function LoginPage() {
         </div>
       </div>
 
-      {/* Right Login Section */}
-      <div className="flex-1 flex flex-col items-center justify-center p-6 sm:p-12 md:p-16 bg-white animate-in fade-in duration-700">
-        <div className="w-full max-w-[420px] space-y-10">
+      {/* Right Login/Signup Section */}
+      <div className="flex-1 flex flex-col items-center justify-center p-6 sm:p-12 md:p-16 bg-white animate-in fade-in duration-700 overflow-hidden">
+        <div className="w-full max-w-[420px] transition-all duration-500 ease-in-out">
           
-          {/* Logo and Greeting */}
-          <div className="flex flex-col items-center text-center space-y-6">
+          {/* Logo - Keep static or part of slide? Let's keep it static for brand consistency */}
+          <div className="flex flex-col items-center text-center mb-8">
             <div className="relative p-1 bg-white rounded-2xl shadow-sm border border-slate-100 transition-transform hover:scale-105">
               <img 
                 src="https://bihartechassociation.com/wp-content/uploads/2025/04/logo.png" 
                 alt="BPTPIA Logo" 
-                className="h-20 w-auto object-contain"
+                className="h-16 w-auto object-contain"
               />
-            </div>
-            <div className="space-y-2">
-              <h2 className="text-3xl font-bold text-slate-900">Sign in to BPTPIA</h2>
-              <p className="text-slate-500 text-[15px]">Welcome back! Please enter your credentials.</p>
             </div>
           </div>
 
-          {/* Login Form */}
-          <form onSubmit={handleLogin} className="space-y-6">
-            <div className="space-y-4">
-              {/* Email Field */}
-              <div className="space-y-2 group">
-                <label className="text-xs font-bold text-slate-700 uppercase tracking-widest pl-1">Email Address</label>
-                <div className="relative transition-all">
-                  <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
-                    <Mail size={18} className="text-slate-400 group-focus-within:text-violet-500 transition-colors" />
-                  </div>
-                  <input
-                    required
-                    type="email"
-                    placeholder="admin@bptpia.org"
-                    className="w-full pl-11 pr-4 py-3.5 bg-slate-50 border border-slate-200 rounded-2xl outline-none focus:bg-white focus:border-violet-500 focus:ring-4 focus:ring-violet-500/10 transition-all text-[15px] font-medium placeholder:text-slate-400/80"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                  />
+          <div className="relative overflow-hidden">
+            <div 
+              className={`flex w-[200%] transition-transform duration-700 ease-[cubic-bezier(0.4,0,0.2,1)] ${isLogin ? 'translate-x-0' : '-translate-x-1/2'}`}
+            >
+              {/* Sign In Panal */}
+              <div className="w-1/2 pr-4 space-y-8">
+                <div className="space-y-2 text-center">
+                  <h2 className="text-3xl font-bold text-slate-900">Sign in to BPTPIA</h2>
+                  <p className="text-slate-500 text-[15px]">Welcome back! Please enter your credentials.</p>
                 </div>
-              </div>
 
-              {/* Password Field */}
-              <div className="space-y-2 group">
-                <div className="flex justify-between items-center px-1">
-                  <label className="text-xs font-bold text-slate-700 uppercase tracking-widest">Password</label>
-                  <button type="button" className="text-xs font-bold text-violet-600 hover:text-violet-700 transition-colors">Forgot Password?</button>
-                </div>
-                <div className="relative transition-all">
-                  <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
-                    <Lock size={18} className="text-slate-400 group-focus-within:text-violet-500 transition-colors" />
+                <form onSubmit={handleLogin} className="space-y-5">
+                  <div className="space-y-4">
+                    <div className="space-y-2 group">
+                      <label className="text-xs font-bold text-slate-700 uppercase tracking-widest pl-1">Email Address</label>
+                      <div className="relative transition-all">
+                        <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
+                          <Mail size={18} className="text-slate-400 group-focus-within:text-violet-500 transition-colors" />
+                        </div>
+                        <input
+                          required
+                          type="email"
+                          placeholder="admin@bptpia.org"
+                          className="w-full pl-11 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl outline-none focus:bg-white focus:border-violet-500 focus:ring-4 focus:ring-violet-500/10 transition-all text-[15px] font-medium placeholder:text-slate-400/80"
+                          value={email}
+                          onChange={(e) => setEmail(e.target.value)}
+                        />
+                      </div>
+                    </div>
+
+                    <div className="space-y-2 group">
+                      <div className="flex justify-between items-center px-1">
+                        <label className="text-xs font-bold text-slate-700 uppercase tracking-widest">Password</label>
+                        <button type="button" className="text-xs font-bold text-violet-600 hover:text-violet-700 transition-colors">Forgot Password?</button>
+                      </div>
+                      <div className="relative transition-all">
+                        <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
+                          <Lock size={18} className="text-slate-400 group-focus-within:text-violet-500 transition-colors" />
+                        </div>
+                        <input
+                          required
+                          type={showPassword ? "text" : "password"}
+                          placeholder="••••••••"
+                          className="w-full pl-11 pr-12 py-3 bg-slate-50 border border-slate-200 rounded-2xl outline-none focus:bg-white focus:border-violet-500 focus:ring-4 focus:ring-violet-500/10 transition-all text-[15px] font-medium placeholder:text-slate-400/80"
+                          value={password}
+                          onChange={(e) => setPassword(e.target.value)}
+                        />
+                        <button
+                          type="button"
+                          onClick={() => setShowPassword(!showPassword)}
+                          className="absolute inset-y-0 right-0 pr-4 flex items-center text-slate-400 hover:text-slate-600 transition-colors"
+                        >
+                          {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                        </button>
+                      </div>
+                    </div>
+
+                    <div className="flex items-center px-1">
+                      <label className="flex items-center gap-2.5 cursor-pointer group">
+                        <input 
+                          type="checkbox" 
+                          className="w-5 h-5 rounded-lg border-slate-200 text-violet-600 focus:ring-violet-500 transition-all cursor-pointer bg-slate-50" 
+                        />
+                        <span className="text-sm font-medium text-slate-600 group-hover:text-slate-800 transition-colors">Remember me</span>
+                      </label>
+                    </div>
                   </div>
-                  <input
-                    required
-                    type={showPassword ? "text" : "password"}
-                    placeholder="••••••••"
-                    className="w-full pl-11 pr-12 py-3.5 bg-slate-50 border border-slate-200 rounded-2xl outline-none focus:bg-white focus:border-violet-500 focus:ring-4 focus:ring-violet-500/10 transition-all text-[15px] font-medium placeholder:text-slate-400/80"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                  />
+
                   <button
-                    type="button"
-                    onClick={() => setShowPassword(!showPassword)}
-                    className="absolute inset-y-0 right-0 pr-4 flex items-center text-slate-400 hover:text-slate-600 transition-colors"
+                    disabled={loading}
+                    type="submit"
+                    className="group relative w-full py-4 bg-slate-900 hover:bg-slate-800 text-white rounded-2xl font-bold text-[16px] overflow-hidden transition-all active:scale-[0.98] disabled:opacity-70 disabled:cursor-not-allowed shadow-xl shadow-slate-200"
                   >
-                    {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                    <div className="relative z-10 flex items-center justify-center gap-2">
+                      {loading ? (
+                        <Loader2 size={20} className="animate-spin" />
+                      ) : (
+                        <>
+                          Sign In
+                          <ArrowRight size={18} className="group-hover:translate-x-1 transition-transform" />
+                        </>
+                      )}
+                    </div>
+                    <div className="absolute inset-0 bg-gradient-to-r from-violet-600 to-indigo-600 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
                   </button>
-                </div>
+
+                  <p className="text-center text-sm text-slate-500">
+                    Don't have an account?{" "}
+                    <button 
+                      type="button"
+                      onClick={() => setIsLogin(false)}
+                      className="font-bold text-violet-600 hover:text-violet-700 border-b-2 border-violet-600/10 hover:border-violet-600 transition-all pb-0.5"
+                    >
+                      Create Account
+                    </button>
+                  </p>
+                </form>
               </div>
 
-              {/* Remember Me */}
-              <div className="flex items-center px-1">
-                <label className="flex items-center gap-2.5 cursor-pointer group">
-                  <input 
-                    type="checkbox" 
-                    className="w-5 h-5 rounded-lg border-slate-200 text-violet-600 focus:ring-violet-500 transition-all cursor-pointer bg-slate-50" 
-                  />
-                  <span className="text-sm font-medium text-slate-600 group-hover:text-slate-800 transition-colors">Remember me for 30 days</span>
-                </label>
+              {/* Sign Up Panal */}
+              <div className="w-1/2 pl-4 space-y-8">
+                <div className="space-y-2 text-center">
+                  <h2 className="text-3xl font-bold text-slate-900">Create Account</h2>
+                  <p className="text-slate-500 text-[15px]">Join our community today.</p>
+                </div>
+
+                <form onSubmit={handleSignup} className="space-y-5">
+                  <div className="space-y-4">
+                    {/* Email */}
+                    <div className="space-y-1.5 group">
+                      <label className="text-[10px] font-bold text-slate-700 uppercase tracking-widest pl-1">Email Address</label>
+                      <div className="relative transition-all">
+                        <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
+                          <Mail size={16} className="text-slate-400 group-focus-within:text-violet-500 transition-colors" />
+                        </div>
+                        <input
+                          required
+                          type="email"
+                          placeholder="your@email.com"
+                          className="w-full pl-11 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-2xl outline-none focus:bg-white focus:border-violet-500 focus:ring-4 focus:ring-violet-500/10 transition-all text-[15px] font-medium placeholder:text-slate-400/80"
+                          value={email}
+                          onChange={(e) => setEmail(e.target.value)}
+                        />
+                      </div>
+                    </div>
+
+                    {/* Phone Number */}
+                    <div className="space-y-1.5 group">
+                      <label className="text-[10px] font-bold text-slate-700 uppercase tracking-widest pl-1">Phone Number</label>
+                      <div className="relative transition-all">
+                        <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
+                          <Phone size={16} className="text-slate-400 group-focus-within:text-violet-500 transition-colors" />
+                        </div>
+                        <input
+                          required
+                          type="tel"
+                          placeholder="+91 00000 00000"
+                          className="w-full pl-11 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-2xl outline-none focus:bg-white focus:border-violet-500 focus:ring-4 focus:ring-violet-500/10 transition-all text-[15px] font-medium placeholder:text-slate-400/80"
+                          value={phone}
+                          onChange={(e) => setPhone(e.target.value)}
+                        />
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-4">
+                      {/* Password */}
+                      <div className="space-y-1.5 group">
+                        <label className="text-[10px] font-bold text-slate-700 uppercase tracking-widest pl-1">Password</label>
+                        <div className="relative transition-all">
+                          <input
+                            required
+                            type={showSignupPassword ? "text" : "password"}
+                            placeholder="••••••••"
+                            className="w-full pl-4 pr-10 py-2.5 bg-slate-50 border border-slate-200 rounded-2xl outline-none focus:bg-white focus:border-violet-500 focus:ring-4 focus:ring-violet-500/10 transition-all text-[15px] font-medium placeholder:text-slate-400/80"
+                            value={password}
+                            onChange={(e) => setPassword(e.target.value)}
+                          />
+                          <button
+                            type="button"
+                            onClick={() => setShowSignupPassword(!showSignupPassword)}
+                            className="absolute inset-y-0 right-0 pr-3 flex items-center text-slate-400 hover:text-slate-600 transition-colors"
+                          >
+                            {showSignupPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+                          </button>
+                        </div>
+                      </div>
+                      {/* Confirm Password */}
+                      <div className="space-y-1.5 group">
+                        <label className="text-[10px] font-bold text-slate-700 uppercase tracking-widest pl-1">Confirm</label>
+                        <div className="relative transition-all">
+                          <input
+                            required
+                            type={showConfirmPassword ? "text" : "password"}
+                            placeholder="••••••••"
+                            className="w-full pl-4 pr-10 py-2.5 bg-slate-50 border border-slate-200 rounded-2xl outline-none focus:bg-white focus:border-violet-500 focus:ring-4 focus:ring-violet-500/10 transition-all text-[15px] font-medium placeholder:text-slate-400/80"
+                            value={confirmPassword}
+                            onChange={(e) => setConfirmPassword(e.target.value)}
+                          />
+                          <button
+                            type="button"
+                            onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                            className="absolute inset-y-0 right-0 pr-3 flex items-center text-slate-400 hover:text-slate-600 transition-colors"
+                          >
+                            {showConfirmPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+                          </button>
+                        </div>
+                      </div>
+
+                    </div>
+                  </div>
+
+                  <button
+                    disabled={loading}
+                    type="submit"
+                    className="group relative w-full py-4 bg-slate-900 hover:bg-slate-800 text-white rounded-2xl font-bold text-[16px] overflow-hidden transition-all active:scale-[0.98] disabled:opacity-70 disabled:cursor-not-allowed shadow-xl shadow-slate-200"
+                  >
+                    <div className="relative z-10 flex items-center justify-center gap-2">
+                      {loading ? (
+                        <Loader2 size={20} className="animate-spin" />
+                      ) : (
+                        <>
+                          Sign Up
+                          <ArrowRight size={18} className="group-hover:translate-x-1 transition-transform" />
+                        </>
+                      )}
+                    </div>
+                    <div className="absolute inset-0 bg-gradient-to-r from-violet-600 to-indigo-600 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+                  </button>
+
+                  <p className="text-center text-sm text-slate-500">
+                    Already have an account?{" "}
+                    <button 
+                      type="button"
+                      onClick={() => setIsLogin(true)}
+                      className="font-bold text-violet-600 hover:text-violet-700 border-b-2 border-violet-600/10 hover:border-violet-600 transition-all pb-0.5"
+                    >
+                      Sign In
+                    </button>
+                  </p>
+                </form>
               </div>
             </div>
+          </div>
 
-            {/* Submit Button */}
-            <button
-              disabled={loading}
-              type="submit"
-              className="group relative w-full py-4 bg-slate-900 hover:bg-slate-800 text-white rounded-2xl font-bold text-[16px] overflow-hidden transition-all active:scale-[0.98] disabled:opacity-70 disabled:cursor-not-allowed shadow-xl shadow-slate-200"
-            >
-              <div className="relative z-10 flex items-center justify-center gap-2">
-                {loading ? (
-                  <Loader2 size={20} className="animate-spin" />
-                ) : (
-                  <>
-                    Sign In
-                    <ArrowRight size={18} className="group-hover:translate-x-1 transition-transform" />
-                  </>
-                )}
-              </div>
-              <div className="absolute inset-0 bg-gradient-to-r from-violet-600 to-indigo-600 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-            </button>
-          </form>
-
-          {/* Footer Support */}
-          <p className="text-center text-sm text-slate-500">
-            Need help? <a href="#" className="font-bold text-slate-900 border-b-2 border-slate-900/10 hover:border-slate-900 transition-all pb-0.5">Contact Technical Support</a>
-          </p>
+          {/* Footer Support - Static at bottom */}
+          <div className="mt-10 py-6 border-t border-slate-100 text-center">
+            <p className="text-sm text-slate-500">
+              Need help? <a href="#" className="font-bold text-slate-900 border-b-2 border-slate-900/10 hover:border-slate-900 transition-all pb-0.5">Contact Technical Support</a>
+            </p>
+          </div>
         </div>
       </div>
+
     </div>
   );
 }

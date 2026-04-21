@@ -21,6 +21,10 @@ export const masterService = {
     return apiClient<{ success: boolean; data: CityEntry[] }>(`${API_ENDPOINTS.MASTER.CITIES}/${stateId}`);
   },
 
+  getAllCities: async () => {
+    return apiClient<{ success: boolean; data: CityEntry[] }>(API_ENDPOINTS.MASTER.CITIES);
+  },
+
   createCity: async (data: { name: string; stateId: number }) => {
     return http.post<{ success: boolean; data: CityEntry }>(API_ENDPOINTS.MASTER.CITIES, data);
   },

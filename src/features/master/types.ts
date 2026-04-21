@@ -43,6 +43,7 @@ export interface MasterTableProps {
   onEdit: (item: any) => void;
   onDelete: (id: number) => void;
   isLoading: boolean;
+  filter?: React.ReactNode;
 }
 
 export interface MasterModalProps {

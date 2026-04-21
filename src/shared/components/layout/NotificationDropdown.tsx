@@ -37,9 +37,10 @@ export function NotificationDropdown() {
     }
   }, []);
 
-  useEffect(() => {
-    fetchNotifications();
-  }, [fetchNotifications]);
+  // Initial history fetch disabled - only live notifications will be shown
+  // useEffect(() => {
+  //   fetchNotifications();
+  // }, [fetchNotifications]);
 
   // Listen for live notifications
   useEffect(() => {

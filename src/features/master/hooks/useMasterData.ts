@@ -36,6 +36,20 @@ export function useMasterData() {
     }
   }, []);
 
+  const fetchAllCities = useCallback(async () => {
+    setIsLoading(true);
+    try {
+      const response = await masterService.getAllCities();
+      if (response.success) {
+        setCities(response.data);
+      }
+    } catch (err) {
+      setError("Failed to fetch all cities");
+    } finally {
+      setIsLoading(false);
+    }
+  }, []);
+
   const addState = async (name: string) => {
     try {
       const response = await masterService.createState({ name });
@@ -95,6 +109,7 @@ export function useMasterData() {
     error,
     fetchStates,
     fetchCities,
+    fetchAllCities,
     addState,
     removeState,
     addCity,

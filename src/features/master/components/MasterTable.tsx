@@ -15,7 +15,8 @@ export function MasterTable({
   onAdd,
   onEdit,
   onDelete,
-  isLoading
+  isLoading,
+  filter
 }: MasterTableProps) {
   const [searchTerm, setSearchTerm] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
@@ -69,9 +70,7 @@ export function MasterTable({
             />
           </div>
           
-          <button className="p-2.5 bg-white border border-slate-200 shadow-sm rounded-md text-slate-400 hover:text-slate-600 transition-colors h-10">
-            <Filter size={18} />
-          </button>
+          {filter}
 
           <button 
             onClick={onAdd}
@@ -187,19 +186,48 @@ export function MasterTable({
                 </button>
                 
                 <div className="flex items-center gap-1">
-                    {[...Array(totalPages)].map((_, i) => (
-                        <button
-                            key={i}
-                            onClick={() => handlePageChange(i + 1)}
-                            className={`w-8 h-8 rounded-lg text-[12px] font-black transition-all ${
-                                currentPage === i + 1 
-                                ? 'bg-white text-[#00b4d8] shadow-sm border border-slate-200 ring-2 ring-blue-50' 
-                                : 'text-slate-400 hover:bg-white hover:text-slate-600'
-                            }`}
-                        >
-                            {i + 1}
-                        </button>
-                    ))}
+                    {/* Sliding Window Pagination */}
+                    {(() => {
+                        const pages = [];
+                        const maxVisible = 4;
+                        let start = Math.max(1, currentPage - 1);
+                        let end = Math.min(totalPages, start + maxVisible - 1);
+                        
+                        if (end - start + 1 < maxVisible) {
+                            start = Math.max(1, end - maxVisible + 1);
+                        }
+
+                        if (start > 1) {
+                            pages.push(
+                                <button key={1} onClick={() => handlePageChange(1)} className="w-8 h-8 rounded-lg text-[12px] font-black text-slate-400 hover:bg-white">1</button>
+                            );
+                            if (start > 2) pages.push(<span key="dots-start" className="text-slate-300 px-1">...</span>);
+                        }
+
+                        for (let i = start; i <= end; i++) {
+                            pages.push(
+                                <button
+                                    key={i}
+                                    onClick={() => handlePageChange(i)}
+                                    className={`w-8 h-8 rounded-lg text-[12px] font-black transition-all ${
+                                        currentPage === i 
+                                        ? 'bg-white text-[#00b4d8] shadow-sm border border-slate-200 ring-2 ring-blue-50' 
+                                        : 'text-slate-400 hover:bg-white hover:text-slate-600'
+                                    }`}
+                                >
+                                    {i}
+                                </button>
+                            );
+                        }
+
+                        if (end < totalPages) {
+                            if (end < totalPages - 1) pages.push(<span key="dots-end" className="text-slate-300 px-1">...</span>);
+                            pages.push(
+                                <button key={totalPages} onClick={() => handlePageChange(totalPages)} className="w-8 h-8 rounded-lg text-[12px] font-black text-slate-400 hover:bg-white">{totalPages}</button>
+                            );
+                        }
+                        return pages;
+                    })()}
                 </div>
 
                 <button 

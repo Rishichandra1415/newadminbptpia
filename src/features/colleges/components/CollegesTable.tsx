@@ -299,19 +299,48 @@ export function CollegesTable({
                 </button>
                 
                 <div className="flex items-center gap-1">
-                    {[...Array(totalPages)].map((_, i) => (
-                        <button
-                            key={i}
-                            onClick={() => handlePageChange(i + 1)}
-                            className={`w-8 h-8 rounded-lg text-[12px] font-black transition-all ${
-                                currentPage === i + 1 
-                                ? 'bg-white text-[#00b4d8] shadow-sm border border-slate-200 ring-2 ring-blue-50' 
-                                : 'text-slate-400 hover:bg-white hover:text-slate-600'
-                            }`}
-                        >
-                            {i + 1}
-                        </button>
-                    ))}
+                    {/* Sliding Window Pagination (Max 4 Pages) */}
+                    {(() => {
+                        const pages = [];
+                        const maxVisible = 4;
+                        let start = Math.max(1, currentPage - 1);
+                        let end = Math.min(totalPages, start + maxVisible - 1);
+                        
+                        if (end - start + 1 < maxVisible) {
+                            start = Math.max(1, end - maxVisible + 1);
+                        }
+
+                        if (start > 1) {
+                            pages.push(
+                                <button key={1} onClick={() => handlePageChange(1)} className="w-8 h-8 rounded-lg text-[12px] font-black text-slate-400 hover:bg-white transition-all">1</button>
+                            );
+                            if (start > 2) pages.push(<span key="dots-start" className="text-slate-300 px-1">...</span>);
+                        }
+
+                        for (let i = start; i <= end; i++) {
+                            pages.push(
+                                <button
+                                    key={i}
+                                    onClick={() => handlePageChange(i)}
+                                    className={`w-8 h-8 rounded-lg text-[12px] font-black transition-all ${
+                                        currentPage === i 
+                                        ? 'bg-white text-[#00b4d8] shadow-sm border border-slate-200 ring-2 ring-blue-50' 
+                                        : 'text-slate-400 hover:bg-white hover:text-slate-600'
+                                    }`}
+                                >
+                                    {i}
+                                </button>
+                            );
+                        }
+
+                        if (end < totalPages) {
+                            if (end < totalPages - 1) pages.push(<span key="dots-end" className="text-slate-300 px-1">...</span>);
+                            pages.push(
+                                <button key={totalPages} onClick={() => handlePageChange(totalPages)} className="w-8 h-8 rounded-lg text-[12px] font-black text-slate-400 hover:bg-white transition-all">{totalPages}</button>
+                            );
+                        }
+                        return pages;
+                    })()}
                 </div>
 
                 <button 

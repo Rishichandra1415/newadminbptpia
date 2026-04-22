@@ -25,34 +25,21 @@ export default function LoginPage() {
     e.preventDefault();
     setLoading(true);
     
-    try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/auth/login`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ email, password }),
-      });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.message || "Invalid credentials");
-      }
-
-      // Store token for future authenticated requests
-      localStorage.setItem("token", data.token);
-      localStorage.setItem("user", JSON.stringify(data.user));
+    // Bypass authentication and simulate a small delay for better UX
+    setTimeout(() => {
+      localStorage.setItem("token", "bypass-token");
+      localStorage.setItem("user", JSON.stringify({ 
+        name: "Admin User", 
+        email: email || "admin@bptpia.org",
+        role: "admin"
+      }));
       
-      toast.success("Welcome back! Login successful.");
+      toast.success("Welcome back! Continuing to dashboard...");
       
       // Navigate to dashboard
       router.push("/admin");
-    } catch (error: any) {
-      toast.error(error.message || "Something went wrong. Please try again.");
-    } finally {
       setLoading(false);
-    }
+    }, 800);
   };
 
 
@@ -132,11 +119,11 @@ export default function LoginPage() {
             <div 
               className={`flex w-[200%] transition-transform duration-700 ease-[cubic-bezier(0.4,0,0.2,1)] ${isLogin ? 'translate-x-0' : '-translate-x-1/2'}`}
             >
-              {/* Sign In Panal */}
+              {/* Continue Panel */}
               <div className="w-1/2 pr-4 space-y-8">
                 <div className="space-y-2 text-center">
-                  <h2 className="text-3xl font-bold text-slate-900">Sign in to BPTPIA</h2>
-                  <p className="text-slate-500 text-[15px]">Welcome back! Please enter your credentials.</p>
+                  <h2 className="text-3xl font-bold text-slate-900">Continue to BPTPIA</h2>
+                  <p className="text-slate-500 text-[15px]">Welcome back! Click continue to access your dashboard.</p>
                 </div>
 
                 <form onSubmit={handleLogin} className="space-y-5">
@@ -148,7 +135,6 @@ export default function LoginPage() {
                           <Mail size={18} className="text-slate-400 group-focus-within:text-violet-500 transition-colors" />
                         </div>
                         <input
-                          required
                           type="email"
                           placeholder="admin@bptpia.org"
                           className="w-full pl-11 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl outline-none focus:bg-white focus:border-violet-500 focus:ring-4 focus:ring-violet-500/10 transition-all text-[15px] font-medium placeholder:text-slate-400/80"
@@ -168,7 +154,6 @@ export default function LoginPage() {
                           <Lock size={18} className="text-slate-400 group-focus-within:text-violet-500 transition-colors" />
                         </div>
                         <input
-                          required
                           type={showPassword ? "text" : "password"}
                           placeholder="••••••••"
                           className="w-full pl-11 pr-12 py-3 bg-slate-50 border border-slate-200 rounded-2xl outline-none focus:bg-white focus:border-violet-500 focus:ring-4 focus:ring-violet-500/10 transition-all text-[15px] font-medium placeholder:text-slate-400/80"
@@ -206,7 +191,7 @@ export default function LoginPage() {
                         <Loader2 size={20} className="animate-spin" />
                       ) : (
                         <>
-                          Sign In
+                          Continue
                           <ArrowRight size={18} className="group-hover:translate-x-1 transition-transform" />
                         </>
                       )}
@@ -214,7 +199,7 @@ export default function LoginPage() {
                     <div className="absolute inset-0 bg-gradient-to-r from-violet-600 to-indigo-600 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
                   </button>
 
-                  <p className="text-center text-sm text-slate-500">
+                  {/* <p className="text-center text-sm text-slate-500">
                     Don't have an account?{" "}
                     <button 
                       type="button"
@@ -223,11 +208,11 @@ export default function LoginPage() {
                     >
                       Create Account
                     </button>
-                  </p>
+                  </p> */}
                 </form>
               </div>
 
-              {/* Sign Up Panal */}
+              {/* Sign Up Panel */}
               <div className="w-1/2 pl-4 space-y-8">
                 <div className="space-y-2 text-center">
                   <h2 className="text-3xl font-bold text-slate-900">Create Account</h2>
@@ -344,7 +329,7 @@ export default function LoginPage() {
                       onClick={() => setIsLogin(true)}
                       className="font-bold text-violet-600 hover:text-violet-700 border-b-2 border-violet-600/10 hover:border-violet-600 transition-all pb-0.5"
                     >
-                      Sign In
+                      Continue
                     </button>
                   </p>
                 </form>

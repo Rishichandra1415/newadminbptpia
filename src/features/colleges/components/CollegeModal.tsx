@@ -450,14 +450,14 @@ export function CollegeModal({ isOpen, onClose, onSave, category, editData }: Co
                     <div className="relative">
                         <FileBadge size={14} className="absolute left-3 top-3 text-slate-400" />
                         <input 
-                        type="text" placeholder="https://..." 
-                        className="w-full pl-9 pr-32 p-2.5 rounded-lg text-sm border border-slate-200 focus:border-[#00b4d8] outline-none" 
-                        value={formData.brochureUrl && !formData.brochureUrl.startsWith('data:') ? formData.brochureUrl : ""} 
-                        onChange={(e) => setFormData({...formData, brochureUrl: e.target.value, brochureFileName: undefined})} 
+                          type="text" placeholder="https://..." 
+                          className="w-full pl-9 pr-36 p-2.5 rounded-lg text-sm border border-slate-200 focus:border-[#00b4d8] outline-none" 
+                          value={formData.brochureUrl && !formData.brochureUrl.startsWith('data:') ? formData.brochureUrl : ""} 
+                          onChange={(e) => setFormData({...formData, brochureUrl: e.target.value, brochureFileName: undefined})} 
                         />
-                        {/* <div className="absolute right-1 top-1 flex items-center gap-1">
+                        <div className="absolute right-1 top-1 flex items-center gap-1">
                             <label className="bg-slate-100 hover:bg-slate-200 text-slate-600 px-3 py-1.5 rounded-md text-[11px] font-bold cursor-pointer transition-colors border border-slate-200 flex items-center gap-1.5">
-                                <Plus size={14} /> Upload PDF
+                                <Plus size={14} /> PDF
                                 <input 
                                     type="file" 
                                     accept="application/pdf" 
@@ -489,7 +489,7 @@ export function CollegeModal({ isOpen, onClose, onSave, category, editData }: Co
                                     <X size={16} />
                                 </button>
                             )}
-                        </div> */}
+                        </div>
                     </div>
                     
                     {formData.brochureFileName && (

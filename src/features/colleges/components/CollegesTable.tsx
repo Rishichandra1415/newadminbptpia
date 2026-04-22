@@ -15,6 +15,7 @@ import {
 import { CollegesTableProps, College, CollegeType } from "../types";
 
 import { capitalizeWords } from "@/shared/utils/string-utils";
+import { getFileUrl } from "@/shared/api/api-client";
 
 interface ExtendedCollegesTableProps extends Omit<CollegesTableProps, 'category'> {
     filter: 'ALL' | CollegeType;
@@ -155,7 +156,7 @@ export function CollegesTable({
                                 </span>
                                 {college.brochureUrl && (
                                   <a 
-                                    href={college.brochureUrl} 
+                                    href={getFileUrl(college.brochureUrl)} 
                                     target="_blank" 
                                     rel="noopener noreferrer"
                                     className="p-1.5 bg-red-50 text-red-500 rounded hover:bg-red-100 transition-colors"

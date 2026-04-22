@@ -125,9 +125,9 @@ export default function LoginPage() {
           <div className="flex flex-col items-center text-center mb-8">
             <div className="relative p-1 bg-white rounded-2xl shadow-sm border border-slate-100 transition-transform hover:scale-105">
               <img 
-                src="https://bihartechassociation.com/wp-content/uploads/2025/04/logo.png" 
+                src="/Logo.png" 
                 alt="BPTPIA Logo" 
-                className="h-16 w-auto object-contain"
+                className="h-12 w-auto object-contain"
               />
             </div>
           </div>

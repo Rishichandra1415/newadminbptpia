@@ -19,7 +19,9 @@ export async function apiClient<T>(
   endpoint: string,
   options: RequestInit = {}
 ): Promise<T> {
-  const url = `${BASE_URL}${endpoint}`;
+  const cleanBaseUrl = BASE_URL.replace(/\/$/, "");
+  const cleanEndpoint = endpoint.startsWith("/") ? endpoint : `/${endpoint}`;
+  const url = `${cleanBaseUrl}${cleanEndpoint}`;
   
   const isFormData = options.body instanceof FormData;
   const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null;

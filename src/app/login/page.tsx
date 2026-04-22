@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import Image from "next/image";
 import { Mail, Lock, Eye, EyeOff, Loader2, ArrowRight, Phone } from "lucide-react";
 import { toast } from "@/shared/utils/toast-utils";
+import { http } from "@/shared/api/api-client";
 
 
 
@@ -23,23 +24,39 @@ export default function LoginPage() {
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    if (!email || !password) {
+      toast.error("Please enter both email and password");
+      return;
+    }
+
     setLoading(true);
     
-    // Bypass authentication and simulate a small delay for better UX
-    setTimeout(() => {
-      localStorage.setItem("token", "bypass-token");
-      localStorage.setItem("user", JSON.stringify({ 
-        name: "Admin User", 
-        email: email || "admin@bptpia.org",
-        role: "admin"
-      }));
-      
-      toast.success("Welcome back! Continuing to dashboard...");
-      
-      // Navigate to dashboard
-      router.push("/admin");
+    try {
+      const response = await http.post<{
+        success: boolean;
+        token: string;
+        user: any;
+        message?: string;
+      }>("/auth/login", { email, password });
+
+      if (response.success) {
+        localStorage.setItem("token", response.token);
+        localStorage.setItem("user", JSON.stringify(response.user));
+        
+        toast.success("Welcome back! Accessing your dashboard...");
+        
+        // Navigate to dashboard
+        router.push("/admin");
+      } else {
+        toast.error(response.message || "Invalid credentials");
+      }
+    } catch (err: any) {
+      console.error("Login error:", err);
+      toast.error(err.message || "Failed to connect to authentication server");
+    } finally {
       setLoading(false);
-    }, 800);
+    }
   };
 
 

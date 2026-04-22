@@ -215,7 +215,17 @@ export function GovLettersTable({
                                  {capitalizeWords(letter.subject)}
                                </p>
                                <a 
-                                  href={getFileUrl(Array.isArray(letter.images) ? letter.images[0] : letter.images)} 
+                                  href={getFileUrl((() => {
+                                      const imgs = letter.images;
+                                      if (Array.isArray(imgs)) return imgs[0];
+                                      if (typeof imgs === 'string' && imgs.startsWith('[')) {
+                                          try {
+                                              const parsed = JSON.parse(imgs);
+                                              return Array.isArray(parsed) ? parsed[0] : imgs;
+                                          } catch (e) { return imgs; }
+                                      }
+                                      return imgs;
+                                  })())} 
                                   target="_blank" 
                                   rel="noopener noreferrer" 
                                   className="text-[10px] text-slate-400 hover:text-[#00b4d8] hover:underline"

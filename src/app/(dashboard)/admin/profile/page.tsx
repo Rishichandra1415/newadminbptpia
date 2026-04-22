@@ -193,7 +193,7 @@ export default function ProfilePage() {
                     </div>
 
                     {/* Form Card */}
-                    <div className="lg:col-span-2">
+                    <div className="lg:col-span-2 space-y-8">
                         <div className="bg-white rounded-[2rem] border border-slate-100 shadow-xl shadow-slate-200/40 p-4 sm:p-6 md:p-8">
                             <h3 className="text-[12px] font-black text-slate-800 uppercase tracking-widest border-b border-slate-50 pb-4 mb-6 sm:mb-8 flex items-center gap-2">
                                 <User size={16} className="text-[#00b4d8]" />
@@ -252,6 +252,95 @@ export default function ProfilePage() {
                                             <Save size={18} className="group-hover:scale-110 transition-transform" />
                                         )}
                                         {isSaving ? "Saving..." : "Update Profile"}
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+
+                        {/* Password Section */}
+                        <div className="bg-white rounded-[2rem] border border-slate-100 shadow-xl shadow-slate-200/40 p-4 sm:p-6 md:p-8">
+                            <h3 className="text-[12px] font-black text-slate-800 uppercase tracking-widest border-b border-slate-50 pb-4 mb-6 sm:mb-8 flex items-center gap-2">
+                                <ShieldCheck size={16} className="text-[#f59e0b]" />
+                                Security Settings
+                            </h3>
+
+                            <form 
+                                onSubmit={async (e) => {
+                                    e.preventDefault();
+                                    const formData = new FormData(e.currentTarget);
+                                    const oldPassword = formData.get('oldPassword') as string;
+                                    const newPassword = formData.get('newPassword') as string;
+                                    const confirmPassword = formData.get('confirmPassword') as string;
+
+                                    if (newPassword !== confirmPassword) {
+                                        setMessage({ type: 'error', text: "New passwords do not match" });
+                                        return;
+                                    }
+
+                                    setIsSaving(true);
+                                    try {
+                                        const token = localStorage.getItem('token');
+                                        const res = await fetch(`${API_BASE_URL}/auth/change-password`, {
+                                            method: 'PATCH',
+                                            headers: {
+                                                'Authorization': `Bearer ${token}`,
+                                                'Content-Type': 'application/json'
+                                            },
+                                            body: JSON.stringify({ oldPassword, newPassword })
+                                        });
+
+                                        const json = await res.json();
+                                        if (json.success) {
+                                            setMessage({ type: 'success', text: "Password changed successfully!" });
+                                            (e.target as HTMLFormElement).reset();
+                                        } else {
+                                            setMessage({ type: 'error', text: json.message || "Failed to change password" });
+                                        }
+                                    } catch (error) {
+                                        setMessage({ type: 'error', text: "An error occurred" });
+                                    } finally {
+                                        setIsSaving(false);
+                                    }
+                                }} 
+                                className="space-y-6"
+                            >
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 sm:gap-8">
+                                    <div className="space-y-2">
+                                        <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Current Password</label>
+                                        <input 
+                                            name="oldPassword"
+                                            type="password" 
+                                            required
+                                            className="w-full h-12 px-4 rounded-2xl border border-slate-200 text-slate-800 font-bold text-sm focus:border-[#f59e0b] focus:ring-4 focus:ring-[#f59e0b]/10 outline-none transition-all"
+                                        />
+                                    </div>
+                                    <div className="space-y-2">
+                                        <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">New Password</label>
+                                        <input 
+                                            name="newPassword"
+                                            type="password" 
+                                            required
+                                            className="w-full h-12 px-4 rounded-2xl border border-slate-200 text-slate-800 font-bold text-sm focus:border-[#f59e0b] focus:ring-4 focus:ring-[#f59e0b]/10 outline-none transition-all"
+                                        />
+                                    </div>
+                                    <div className="space-y-2">
+                                        <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Confirm New Password</label>
+                                        <input 
+                                            name="confirmPassword"
+                                            type="password" 
+                                            required
+                                            className="w-full h-12 px-4 rounded-2xl border border-slate-200 text-slate-800 font-bold text-sm focus:border-[#f59e0b] focus:ring-4 focus:ring-[#f59e0b]/10 outline-none transition-all"
+                                        />
+                                    </div>
+                                </div>
+
+                                <div className="pt-6 border-t border-slate-50 flex justify-end">
+                                    <button 
+                                        type="submit" 
+                                        disabled={isSaving}
+                                        className="w-full sm:w-auto px-8 py-3.5 bg-slate-900 text-white rounded-2xl font-bold text-sm shadow-lg hover:bg-slate-800 transition-all disabled:opacity-50"
+                                    >
+                                        Change Password
                                     </button>
                                 </div>
                             </form>

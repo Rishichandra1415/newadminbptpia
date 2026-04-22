@@ -186,7 +186,17 @@ export function DownloadsTable({
                         {item.type === 'STUDENT_DOWNLOAD' ? (
                             <div className="flex flex-col gap-0.5">
                                 <a 
-                                    href={getFileUrl(item.fileUrl)} 
+                                    href={getFileUrl((() => {
+                                        const path = item.fileUrl;
+                                        if (Array.isArray(path)) return path[0];
+                                        if (typeof path === 'string' && path.startsWith('[')) {
+                                            try {
+                                                const parsed = JSON.parse(path);
+                                                return Array.isArray(parsed) ? parsed[0] : path;
+                                            } catch (e) { return path; }
+                                        }
+                                        return path;
+                                    })())} 
                                     target="_blank" 
                                     rel="noreferrer"
                                     className="text-[12px] text-slate-600 font-medium flex items-center gap-1.5 hover:text-blue-400 transition-colors"

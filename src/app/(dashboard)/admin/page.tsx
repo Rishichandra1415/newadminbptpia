@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { http } from "@/shared/api/api-client";
+import { getFileUrl, http } from "@/shared/api/api-client";
 
 interface DashboardData {
     stats: {
@@ -17,6 +17,13 @@ interface DashboardData {
         location: string;
         status: string;
         courseType: string;
+    }[];
+    recentLetters: {
+        id: number;
+        title: string;
+        date: string;
+        category: string;
+        fileUrl: any;
     }[];
 }
 
@@ -145,6 +152,59 @@ export default function DashboardPage() {
              {(!data || data.recentAdmissions.length === 0) && (
                  <div className="text-center py-10 text-gray-400 text-sm">No recent application data available</div>
              )}
+          </div>
+          
+          <div className="mt-8 border-t border-slate-100 pt-8">
+            <div className="flex items-center justify-between mb-6">
+                <h3 className="text-lg font-semibold text-gray-900">Recent Government Letters</h3>
+                <button 
+                    onClick={() => router.push('/admin/gov-letter')}
+                    className="text-sm font-medium text-primary hover:underline"
+                >
+                    View All
+                </button>
+            </div>
+            <div className="flex flex-col gap-4">
+                {data?.recentLetters.map(letter => (
+                    <div key={letter.id} className="flex items-center justify-between p-3 rounded-xl border border-dashed border-gray-200 hover:bg-gray-50 transition-colors">
+                        <div className="flex items-center gap-4">
+                            <div className="h-10 w-10 rounded-full bg-purple-50 flex items-center justify-center">
+                                <svg className="w-5 h-5 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>
+                            </div>
+                            <div className="flex flex-col">
+                                <span className="text-sm font-semibold text-gray-900">{letter.title}</span>
+                                <div className="flex items-center gap-2">
+                                    <span className="text-[10px] text-muted-foreground font-medium">{new Date(letter.date).toLocaleDateString()}</span>
+                                    <span className="h-1 w-1 rounded-full bg-gray-300"></span>
+                                    <span className="text-[10px] text-purple-600 font-bold uppercase">{letter.category}</span>
+                                </div>
+                            </div>
+                        </div>
+                        <a 
+                            href={getFileUrl((() => {
+                                const path = letter.fileUrl;
+                                if (Array.isArray(path)) return path[0];
+                                if (typeof path === 'string' && path.startsWith('[')) {
+                                    try {
+                                        const parsed = JSON.parse(path);
+                                        return Array.isArray(parsed) ? parsed[0] : path;
+                                    } catch (e) { return path; }
+                                }
+                                return path;
+                            })())} 
+                            target="_blank" 
+                            rel="noreferrer"
+                            className="p-2 rounded-lg bg-[#00b4d8]/10 text-[#00b4d8] hover:bg-[#00b4d8] hover:text-white transition-all shadow-sm"
+                            title="View PDF"
+                        >
+                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>
+                        </a>
+                    </div>
+                ))}
+                {(!data || data.recentLetters.length === 0) && (
+                    <div className="text-center py-10 text-gray-400 text-sm">No recent government letters available</div>
+                )}
+            </div>
           </div>
         </div>
 

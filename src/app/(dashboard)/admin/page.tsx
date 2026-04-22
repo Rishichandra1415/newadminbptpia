@@ -58,10 +58,10 @@ export default function DashboardPage() {
   }, []);
 
   const stats = [
-    { name: "Total Colleges", value: data?.stats.totalColleges ?? "0", icon: "School", color: "bg-blue-500", href: "/admin/colleges" },
-    { name: "New Applications", value: data?.stats.totalAdmissions ?? "0", icon: "UserPlus", color: "bg-green-500", href: "/admin/admission-form" },
-    { name: "Active Queries", value: data?.stats.activeQueries ?? "0", icon: "MessageSquare", color: "bg-yellow-500", href: "/admin/enquiry" },
-    { name: "Total Downloads", value: data?.stats.totalDownloads ?? "0", icon: "Download", color: "bg-red-500", href: "/admin/downloads" },
+    { name: "Total Colleges", value: data?.stats?.totalColleges ?? "0", icon: "School", color: "bg-blue-500", href: "/admin/colleges" },
+    { name: "New Applications", value: data?.stats?.totalAdmissions ?? "0", icon: "UserPlus", color: "bg-green-500", href: "/admin/admission-form" },
+    { name: "Active Queries", value: data?.stats?.activeQueries ?? "0", icon: "MessageSquare", color: "bg-yellow-500", href: "/admin/enquiry" },
+    { name: "Total Downloads", value: data?.stats?.totalDownloads ?? "0", icon: "Download", color: "bg-red-500", href: "/admin/downloads" },
   ];
 
   return (
@@ -129,7 +129,7 @@ export default function DashboardPage() {
             </button>
           </div>
           <div className="flex flex-col gap-4">
-             {data?.recentAdmissions.map(item => (
+             {data?.recentAdmissions?.map(item => (
                <div key={item.id} className="flex items-center justify-between p-3 rounded-xl border border-dashed border-gray-200 hover:bg-gray-50 transition-colors">
                   <div className="flex items-center gap-4">
                     <div className="h-10 w-10 rounded-full bg-gray-100 flex items-center justify-center">
@@ -149,7 +149,7 @@ export default function DashboardPage() {
                   </span>
                </div>
              ))}
-             {(!data || data.recentAdmissions.length === 0) && (
+             {(!data || !data.recentAdmissions || data.recentAdmissions.length === 0) && (
                  <div className="text-center py-10 text-gray-400 text-sm">No recent application data available</div>
              )}
           </div>
@@ -165,7 +165,7 @@ export default function DashboardPage() {
                 </button>
             </div>
             <div className="flex flex-col gap-4">
-                {data?.recentLetters.map(letter => (
+                {data?.recentLetters?.map(letter => (
                     <div key={letter.id} className="flex items-center justify-between p-3 rounded-xl border border-dashed border-gray-200 hover:bg-gray-50 transition-colors">
                         <div className="flex items-center gap-4">
                             <div className="h-10 w-10 rounded-full bg-purple-50 flex items-center justify-center">
@@ -201,7 +201,7 @@ export default function DashboardPage() {
                         </a>
                     </div>
                 ))}
-                {(!data || data.recentLetters.length === 0) && (
+                {(!data || !data.recentLetters || data.recentLetters.length === 0) && (
                     <div className="text-center py-10 text-gray-400 text-sm">No recent government letters available</div>
                 )}
             </div>
